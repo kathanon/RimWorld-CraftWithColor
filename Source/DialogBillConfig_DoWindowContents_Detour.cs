@@ -5,18 +5,20 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace CraftWithColor
 {
     [HarmonyPatch(typeof(Dialog_BillConfig), nameof(Dialog_BillConfig.DoWindowContents))]
-    public static class Dialog_BillConfig_DoWindowContents_Detour
+    public static class DialogBillConfig_DoWindowContents_Detour
     {
         private const float LabelHeight = 24f;
         private const float ColorSize = 28f;
         private const float ColorSpace = ColorSize + 10f;
         private const float WidgetsHeight = ColorSize;
+        private const float Offset = 20f;
 
-        public static bool Prefix(Dialog_BillConfig __instance, Rect inRect, Bill_Production ___bill)
+        public static bool Prefix(Rect inRect, Bill_Production ___bill)
         {
             if (ShouldApply(___bill))
             {
@@ -24,63 +26,32 @@ namespace CraftWithColor
                 DrawWidgets(inRect, add);
                 UpdateBill(___bill, add);
             }
-
             return true;
         }
 
         private static void DrawWidgets(Rect inRect, BillAddition add)
         {
             float width = (int)((inRect.width - 34f) / 3f);
-            float top = inRect.height - WidgetsHeight - Window.CloseButSize.y;
-            Rect labelRect = new Rect(0f, top + WidgetsHeight - LabelHeight, width - ColorSpace, LabelHeight);
+            float top = inRect.height - WidgetsHeight - Window.CloseButSize.y - Offset;
+            Rect labelRect = new Rect(0f, top + (WidgetsHeight - LabelHeight) / 2, width - ColorSpace, LabelHeight);
             Rect colorRect = new Rect(width - ColorSize, top, ColorSize, ColorSize);
             Text.Font = GameFont.Small;
-            Widgets.CheckboxLabeled(labelRect, "Dye item", ref add.active, placeCheckboxNearText: true);
+            Widgets.CheckboxLabeled(labelRect, "Dye item", ref add.active, placeCheckboxNearText: false);
             if (add.active)
             {
                 if (Widgets.ButtonInvisible(colorRect))
                 {
                     ColorSelection(add);
                 }
-                Widgets.DrawBoxSolid(colorRect, add.color);
+                Widgets.DrawBoxSolid(colorRect, add.TargetColor);
             }
         }
 
         private static void ColorSelection(BillAddition add)
         {
-            // TODO Include all colonists, see ColonistBar.CheckRecacheEntries()
-            List<FloatMenuOption> subSubMenu1 = new List<FloatMenuOption>
-            {
-                new FloatMenuOption("Option A.1", delegate { }),
-                new FloatMenuOption("Option A.2", delegate { }),
-                new FloatMenuOption("Option A.3", delegate { }),
-            };
-            List<FloatMenuOption> subSubMenu2 = new List<FloatMenuOption>
-            {
-                new FloatMenuOption("Option B.1", delegate { }),
-                new FloatMenuOption("Option B.2", delegate { }),
-                new FloatMenuOption("Option B.3", delegate { }),
-                new FloatMenuOption("Option B.4", delegate { }),
-            };
-            List<FloatMenuOption> subMenu1 = new List<FloatMenuOption>
-            {
-                new FloatSubMenu("Option A", subSubMenu1),
-                new FloatSubMenu("Option B", subSubMenu2),
-                new FloatMenuOption("Option C", delegate { }),
-                new FloatMenuOption("Option D", delegate { }),
-                new FloatMenuOption("Option E", delegate { }),
-            };
-            List<FloatMenuOption> subMenu2 = new List<FloatMenuOption>
-            {
-                new FloatMenuOption("Option F", delegate { }),
-                new FloatMenuOption("Option G", delegate { }),
-                new FloatMenuOption("Option H", delegate { }),
-            };
             List< FloatMenuOption> menu = new List<FloatMenuOption>
             {
                 new FloatMenuOption("Select...", delegate { }),
-                //new FloatSubMenu("Submenu 1", subMenu1),
-                //new FloatSubMenu("Submenu 2", subMenu2),
                 new FloatSubMenu("Favorite", FavoriteSubMenu(add)),
                 new FloatSubMenu("Ideo",     IdeoSubMenu(add))
             };
@@ -103,7 +74,7 @@ namespace CraftWithColor
                 Color color = getColor(item);
                 menu.Add(new FloatMenuOption(
                     item.ToString(),
-                    delegate { add.color = color; }, 
+                    delegate { add.TargetColor = color; }, 
                     BaseContent.WhiteTex, 
                     color));
             }
@@ -112,6 +83,7 @@ namespace CraftWithColor
 
         private static void UpdateBill(Bill_Production bill, BillAddition add)
         {
+            bill.recipe = add.Recipie;
         }
 
         private static bool ShouldApply(Bill_Production bill)

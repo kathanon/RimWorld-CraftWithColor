@@ -1,9 +1,8 @@
-﻿using RimWorld.Planet;
+﻿using RimWorld;
+using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
@@ -17,12 +16,16 @@ namespace CraftWithColor
         private readonly Func<Rect, bool> extraPartOnGUIOuter;
 
         private FloatSubMenuInner subMenu = null;
+        private Action parentCloseCallback = null;
+        private bool parentSetUp = false;
         private bool open = false;
-        private bool subMenuExecuted = false;
+        private bool subMenuOptionChosen = false;
 
         private static readonly Vector2 MenuOffset = new Vector2(-1f, 0f);
         //private static readonly Texture2D ArrowIcon = ContentFinder<Texture2D>.Get("Arrow");
         private const float ArrowExtraWidth = 16f;
+        private const float ArrowOffset = 4f;
+        private const float ArrowAlpha = 0.6f;
 
         public FloatSubMenu(string label, List<FloatMenuOption> subOptions, string subTitle = null, MenuOptionPriority priority = MenuOptionPriority.Default, Thing revalidateClickTarget = null, float extraPartWidth = 0, Func<Rect, bool> extraPartOnGUI = null, WorldObject revalidateWorldClickTarget = null, bool playSelectionSound = true, int orderInPriority = 0) 
             : base(label, NoAction, priority, null, revalidateClickTarget, extraPartWidth + ArrowExtraWidth, null, revalidateWorldClickTarget, playSelectionSound, orderInPriority)
@@ -59,39 +62,69 @@ namespace CraftWithColor
         public bool DrawExtra(Rect rect)
         {
             extraPartOnGUIOuter?.Invoke(rect.LeftPartPixels(extraPartWidthOuter));
-            DrawArrow(rect.RightPartPixels(ArrowExtraWidth));
             return false;
         }
 
-        private static void DrawArrow(Rect arrow)
+        private static void DrawArrow(Rect rect)
         {
-            arrow.width /= 2f;
-            arrow.x += arrow.width;
-            arrow.height /= 2f;
-            arrow.y += arrow.height / 2f;
+            rect.width -= ArrowOffset;
 
             GameFont font = Text.Font;
+            TextAnchor anchor = Text.Anchor;
             Color color = GUI.color;
 
             Text.Font = (font > GameFont.Tiny) ? font - 1 : GameFont.Tiny;
-            GUI.color = new Color(color.r, color.g, color.b, color.a * 0.75f);
-            Widgets.Label(arrow, ">");
+            Text.Anchor = TextAnchor.MiddleRight;
+            GUI.color = new Color(color.r, color.g, color.b, color.a * ArrowAlpha);
+            Widgets.Label(rect, ">");
 
             Text.Font = font;
+            Text.Anchor = anchor;
             GUI.color = color;
         }
 
         public override bool DoGUI(Rect rect, bool colonistOrdering, FloatMenu floatMenu)
         {
-            MouseArea mouseArea = FindMouseArea(rect, floatMenu);
+            SetupParent(floatMenu);
 
+            MouseArea mouseArea = FindMouseArea(rect, floatMenu);
             if (mouseArea == (open ? MouseArea.Menu : MouseArea.Option))
             {
                 MouseAction(rect, !open);
             }
 
+            // When the menu is open, only let super implementation know about mouse movement inside menu
+            Vector2 mouse = Event.current.mousePosition;
+            if (open && mouseArea == MouseArea.Outside)
+            {
+                Event.current.mousePosition = new Vector2(rect.x + 2f, rect.y + 2f);
+            }
+
             base.DoGUI(rect, colonistOrdering, floatMenu);
-            return subMenuExecuted;
+            DrawArrow(rect);
+
+            // Reset mouse position
+            Event.current.mousePosition = mouse;
+            
+            if (subMenuOptionChosen) { floatMenu.PreOptionChosen(this); }
+            return subMenuOptionChosen;
+        }
+
+        private void SetupParent(FloatMenu parent)
+        {
+            if (!(parentSetUp || parent is FloatSubMenuInner))
+            {
+                parentSetUp = true;
+                parentCloseCallback = parent.onCloseCallback;
+                parent.onCloseCallback = OnParentClose;
+            }
+        }
+
+        private void OnParentClose()
+        {
+            CloseSubMenu();
+            // Call any previously set action
+            parentCloseCallback?.Invoke();
         }
 
         private enum MouseArea { Option, Menu, Outside }
@@ -106,46 +139,54 @@ namespace CraftWithColor
             return Mouse.IsOver(menuRect) ? MouseArea.Menu : MouseArea.Outside;
         }
 
-        public void MouseAction(Rect rect, bool enter)
+        private void MouseAction(Rect rect, bool enter)
         {
-            Vector2 localPos = new Vector2(rect.xMax, rect.yMin);
-            if (enter || !MouseInSubMenu(localPos))
+            if (enter)
             {
-                open = enter;
-                if (open)
-                {
-                    Vector2 mouse = Event.current.mousePosition;
-                    Main.Instance.Logger.Message($"Opening sub menu for {Label}, {rect}, mouse: {mouse}");
-                    Vector2 offset = localPos - mouse + MenuOffset;
-                    subMenu = new FloatSubMenuInner(subOptions, subTitle, offset);
-                    Find.WindowStack.Add(subMenu);
-                }
-                else
-                {
-                    Main.Instance.Logger.Message($"Closing sub menu for {Label}");
-                    Find.WindowStack.TryRemove(subMenu);
-                    subMenu = null;
-                }
+                Vector2 localPos = new Vector2(rect.xMax, rect.yMin) + MenuOffset;
+                OpenSubMenu(localPos);
+            }
+            else
+            {
+                CloseSubMenu();
             }
         }
 
-        private bool MouseInSubMenu(Vector2 localPos)
+        private void OpenSubMenu(Vector2 localPos)
         {
-            if (!open) { return false; }
-            Rect menu = subMenu.windowRect;
-            menu.x = localPos.x;
-            menu.y = localPos.y;
-            //Main.Instance.Logger.Message($"MouseInSubMenu for {Label}, {menu}, mouse: {Event.current.mousePosition}");
-            return menu.Contains(Event.current.mousePosition);
+            if (!open)
+            {
+                open = true;
+                Vector2 mouse = Event.current.mousePosition;
+                Vector2 offset = localPos - mouse;
+                SoundDef sound = SoundDefOf.FloatMenu_Open;
+                SoundDefOf.FloatMenu_Open = null;
+                subMenu = new FloatSubMenuInner(this, subOptions, subTitle, offset);
+                SoundDefOf.FloatMenu_Open = sound;
+                Find.WindowStack.Add(subMenu);
+            }
+        }
+
+        private void CloseSubMenu()
+        {
+            if (open)
+            {
+                open = false;
+                Find.WindowStack.TryRemove(subMenu, doCloseSound: false);
+                subMenu = null;
+            }
         }
 
         private class FloatSubMenuInner : FloatMenu
         {
             public Vector2 MouseOffset;
+            public FloatSubMenu parent;
 
-            public FloatSubMenuInner(List<FloatMenuOption> options, string title, Vector2 MouseOffset) : base(options, title, false) 
+            public FloatSubMenuInner(FloatSubMenu parent, List<FloatMenuOption> options, string title, Vector2 MouseOffset) : base(options, title, false) 
             {
                 this.MouseOffset = MouseOffset;
+                this.parent = parent;
+
                 // TODO: support vanishIfMouseDistant = true
                 vanishIfMouseDistant = false;
                 onlyOneOfTypeAllowed = false;
@@ -156,10 +197,22 @@ namespace CraftWithColor
                 Vector2 pos = UI.MousePositionOnUIInverted + MouseOffset;
                 float x = Mathf.Min(pos.x, UI.screenWidth - InitialSize.x);
                 float y = Mathf.Min(pos.y, UI.screenHeight - InitialSize.y);
-
                 windowRect = new Rect(x, y, InitialSize.x, InitialSize.y);
-                Main.Instance.Logger.Message($"* SetInitialSizeAndPosition windowRect = {windowRect}, mouse = {UI.MousePositionOnUIInverted}");
             }
+
+            public override void PreOptionChosen(FloatMenuOption opt)
+            {
+                parent.subMenuOptionChosen = true;
+                base.PreOptionChosen(opt);
+            }
+
+            public override void PreClose()
+            {
+                foreach (FloatSubMenu sub in options.Where(o => o is FloatSubMenu))
+                {
+                    sub.CloseSubMenu();
+                }
+             }
         }
     }
 }
