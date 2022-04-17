@@ -24,7 +24,7 @@ namespace CraftWithColor
             {
                 BillAddition add = State.GetAddition(___bill);
                 DrawWidgets(inRect, add);
-                UpdateBill(___bill, add);
+                add.UpdateBill(___bill);
             }
             return true;
         }
@@ -64,9 +64,9 @@ namespace CraftWithColor
         }
 
         private static List<FloatMenuOption> FavoriteSubMenu(BillAddition add) =>
-            SubMenuItems<Pawn>(Find.CurrentMap.mapPawns.FreeColonists, p => p.story.favoriteColor.Value, add);
+            SubMenuItems(Find.CurrentMap.mapPawns.FreeColonists, p => p.story.favoriteColor.Value, add);
         private static List<FloatMenuOption> IdeoSubMenu(BillAddition add) =>
-            SubMenuItems<Ideo>(Find.IdeoManager.IdeosInViewOrder, i => i.ApparelColor, add);
+            SubMenuItems(Find.IdeoManager.IdeosInViewOrder, i => i.ApparelColor, add);
 
         private static List<FloatMenuOption> SubMenuItems<T>(IEnumerable<T> items, Func<T, Color> getColor, BillAddition add)
         {
@@ -81,11 +81,6 @@ namespace CraftWithColor
                     color));
             }
             return menu;
-        }
-
-        private static void UpdateBill(Bill_Production bill, BillAddition add)
-        {
-            bill.recipe = add.Recipie;
         }
 
         private static bool ShouldApply(Bill_Production bill)

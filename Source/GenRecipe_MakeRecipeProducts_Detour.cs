@@ -10,10 +10,10 @@ namespace CraftWithColor
     {
         public static IEnumerable<Thing> Postfix(IEnumerable<Thing> result)
         {
-            return new PeekEnumerable<Thing>(result, Process);
+            return new EnumerableWithActionOnNext<Thing>(result, Process);
         }
 
-        public static void Process(Thing thing)
+        private static void Process(Thing thing)
         {
             Color? color = State.ColorForLast(thing.def);
             if (color.HasValue)

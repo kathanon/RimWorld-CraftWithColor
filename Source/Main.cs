@@ -14,7 +14,9 @@ namespace CraftWithColor
 
         internal static Main Instance { get; private set; }
 
-        public override string ModIdentifier => "kathanon.CraftWithColor";
+        public const string ModId = "kathanon.CraftWithColor";
+
+        public override string ModIdentifier => ModId;
 
         public override void DefsLoaded()
         {

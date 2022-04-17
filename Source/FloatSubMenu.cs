@@ -93,7 +93,7 @@ namespace CraftWithColor
                 MouseAction(rect, !open);
             }
 
-            // When the menu is open, only let super implementation know about mouse movement inside menu
+            // When the sub menu is open, let super implementation know only about mouse movement inside parent menu
             Vector2 mouse = Event.current.mousePosition;
             if (open && mouseArea == MouseArea.Outside)
             {

@@ -6,17 +6,20 @@ using Verse;
 
 namespace CraftWithColor
 {
-    internal class BillAddition
+    internal class BillAddition : IExposable
     {
-        private Color targetColor = Color.white;
         private RecipeDef coloredRecipie;
+        private RecipeDef originalRecipe;
 
         public bool active = false;
-        public readonly RecipeDef OriginalRecipe;
+        public Color TargetColor = DefaultColor;
+        public static Color DefaultColor = Color.white;
 
-        public BillAddition(RecipeDef recipe)
+        public BillAddition() { }
+
+        public BillAddition(RecipeDef originalRecipe)
         {
-            this.OriginalRecipe = recipe;
+            this.originalRecipe = originalRecipe;
         }
 
         public RecipeDef ColoredRecipie
@@ -31,22 +34,24 @@ namespace CraftWithColor
             }
         }
 
-        public RecipeDef Recipie => active ? ColoredRecipie : OriginalRecipe; 
+        public RecipeDef Recipie => active ? ColoredRecipie : OriginalRecipe;
 
+        public RecipeDef OriginalRecipe => originalRecipe;
 
-        public Color TargetColor { 
-            get => targetColor;
-            set
-            {
-                targetColor = value;
-            }
+        public void UpdateBill(Bill_Production bill)
+        {
+            bill.recipe = Recipie;
+        }
+
+        public void ResetBill(Bill_Production bill)
+        {
+            bill.recipe = OriginalRecipe;
         }
 
         private static RecipeDef CreateColoredRecipie(RecipeDef original)
         {
             RecipeDef res = CopyRecipeFields(original);
             res.generated = true;
-            res.defName = original.defName + "_kathanon_CraftWithColor_colored";
             res.useIngredientsForColor = false;
             res.ingredients = AmendIngredients(original.ingredients);
             return res;
@@ -59,6 +64,7 @@ namespace CraftWithColor
                 allowMixingIngredients = original.allowMixingIngredients,
                 conceptLearned = original.conceptLearned,
                 defaultIngredientFilter = original.defaultIngredientFilter,
+                defName = original.defName,
                 description = original.description,
                 descriptionHyperlinks = original.descriptionHyperlinks,
                 dontShowIfAnyIngredientMissing = original.dontShowIfAnyIngredientMissing,
@@ -107,6 +113,13 @@ namespace CraftWithColor
             dye.SetBaseCount(1);
 
             return new List<IngredientCount>(original) { dye };
+        }
+
+        public void ExposeData()
+        {
+            Scribe_Values.Look(ref active, "active", false);
+            Scribe_Values.Look(ref TargetColor, "color", DefaultColor);
+            Scribe_Defs.Look(ref originalRecipe, "recipie");
         }
     }
 

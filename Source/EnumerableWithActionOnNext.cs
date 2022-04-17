@@ -6,12 +6,12 @@ namespace CraftWithColor
 {
     public static partial class GenRecipe_MakeRecipeProducts_Detour
     {
-        public class PeekEnumerable<T> : IEnumerable<T>
+        public class EnumerableWithActionOnNext<T> : IEnumerable<T>
         {
             private readonly IEnumerable<T> parent;
             private readonly Action<T> action;
 
-            public PeekEnumerable(IEnumerable<T> parent, Action<T> action)
+            public EnumerableWithActionOnNext(IEnumerable<T> parent, Action<T> action)
             {
                 this.parent = parent;
                 this.action = action;
