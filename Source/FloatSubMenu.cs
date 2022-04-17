@@ -20,6 +20,7 @@ namespace CraftWithColor
         private bool parentSetUp = false;
         private bool open = false;
         private bool subMenuOptionChosen = false;
+        private Rect extraGUIRect = new Rect(-1f, -1f, 0f, 0f);
 
         private static readonly Vector2 MenuOffset = new Vector2(-1f, 0f);
         //private static readonly Texture2D ArrowIcon = ContentFinder<Texture2D>.Get("Arrow");
@@ -61,6 +62,7 @@ namespace CraftWithColor
 
         public bool DrawExtra(Rect rect)
         {
+            extraGUIRect = rect.RightPartPixels(ArrowExtraWidth);
             extraPartOnGUIOuter?.Invoke(rect.LeftPartPixels(extraPartWidthOuter));
             return false;
         }
@@ -73,7 +75,7 @@ namespace CraftWithColor
             TextAnchor anchor = Text.Anchor;
             Color color = GUI.color;
 
-            Text.Font = (font > GameFont.Tiny) ? font - 1 : GameFont.Tiny;
+            Text.Font = GameFont.Tiny;
             Text.Anchor = TextAnchor.MiddleRight;
             GUI.color = new Color(color.r, color.g, color.b, color.a * ArrowAlpha);
             Widgets.Label(rect, ">");
@@ -88,14 +90,16 @@ namespace CraftWithColor
             SetupParent(floatMenu);
 
             MouseArea mouseArea = FindMouseArea(rect, floatMenu);
+            bool inExtraSpace = Mouse.IsOver(extraGUIRect);
             if (mouseArea == (open ? MouseArea.Menu : MouseArea.Option))
             {
                 MouseAction(rect, !open);
             }
 
             // When the sub menu is open, let super implementation know only about mouse movement inside parent menu
+            // Also do not let it know if the mouse is in our extraPartOnGUI space, since it does not highlight option then
             Vector2 mouse = Event.current.mousePosition;
-            if (open && mouseArea == MouseArea.Outside)
+            if ((open && mouseArea == MouseArea.Outside) || inExtraSpace)
             {
                 Event.current.mousePosition = new Vector2(rect.x + 2f, rect.y + 2f);
             }
@@ -135,8 +139,7 @@ namespace CraftWithColor
             if (Mouse.IsOver(option)) { return MouseArea.Option; }
 
             // As the current window being drawn, origo will be relative to menu
-            Rect menuRect = new Rect(0f, 0f, menu.windowRect.width, menu.windowRect.height);
-            return Mouse.IsOver(menuRect) ? MouseArea.Menu : MouseArea.Outside;
+            return Mouse.IsOver(menu.windowRect.AtZero()) ? MouseArea.Menu : MouseArea.Outside;
         }
 
         private void MouseAction(Rect rect, bool enter)

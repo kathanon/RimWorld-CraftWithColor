@@ -9,9 +9,29 @@ namespace CraftWithColor
 {
     internal class State
     {
-        private static Dictionary<Bill, BillAddition> dict = 
-            new Dictionary<Bill, BillAddition>();
+
+        private static Dictionary<Bill, BillAddition> dict = new Dictionary<Bill, BillAddition>();
+        private static List<Color> savedColors = new List<Color>();
+        public static Color? defaultColor = null;
+        
         public static Bill_Production LastFinishedBill = null;
+
+        public static List<Color> SavedColors { get { return savedColors; } }
+
+        public static Color DefaultColor
+        {
+            get 
+            {
+                if (!defaultColor.HasValue) 
+                {
+                    defaultColor = 
+                          Find.IdeoManager.classicMode 
+                        ? DefDatabase<ColorDef>.GetRandom().color 
+                        : Find.FactionManager.OfPlayer.ideos.PrimaryIdeo.ApparelColor;
+                }
+                return defaultColor.Value;
+            }
+        }
 
         public static void UnsetLastFinishedBillIf(Bill_Production bill)
         {
@@ -20,8 +40,6 @@ namespace CraftWithColor
                 LastFinishedBill = null;
             }
         }
-
-        // TODO: remove additions for old bills
 
         public static BillAddition GetAddition(Bill_Production bill)
         {
@@ -84,10 +102,13 @@ namespace CraftWithColor
             {
                 CleanupBills();
             }
+
             if (Scribe.EnterNode(Main.ModId)) {
                 Scribe_Collections.Look(ref dict, "additions", LookMode.Reference, LookMode.Deep, ref save.addsKeyWorkList, ref save.addsValueWorkList);
+                Scribe_Collections.Look(ref savedColors, "savedColors", LookMode.Value, null);
                 Scribe.ExitNode();
             }
+
             if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
             {
                 CleanupBills();
@@ -95,6 +116,19 @@ namespace CraftWithColor
                 {
                     add.Value.UpdateBill(add.Key as Bill_Production);
                 }
+            }
+            else if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                int max = SelectColorDialog.SavedColorsMax;
+                if (savedColors == null) 
+                {
+                    savedColors = new List<Color>();
+                }
+                else if (savedColors.Count > max)
+                {
+                    savedColors.RemoveRange(max, savedColors.Count - max);
+                }
+                defaultColor = null;
             }
         }
     }

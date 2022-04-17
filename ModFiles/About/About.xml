@@ -5,7 +5,7 @@
 	<supportedVersions>
 		<li>1.3</li>
 	</supportedVersions>
-	<description>Allows setting the color of ant dyeable item in the workbench order.
+	<description>Allows setting the color of any dyeable item in the workbench order.
 
 1 dye is added to the ingredients (same cost as dyeing it later).</description>
 	<url>https://github.com/kathanon/RimWorld-CraftWithColor</url>

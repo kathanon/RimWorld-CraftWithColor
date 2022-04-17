@@ -41,46 +41,10 @@ namespace CraftWithColor
             {
                 if (Widgets.ButtonInvisible(colorRect))
                 {
-                    ColorSelection(add);
+                    ColorMenu.Open(add);
                 }
                 Widgets.DrawBoxSolid(colorRect, add.TargetColor);
             }
-        }
-
-        private static void ColorSelection(BillAddition add)
-        {
-            List< FloatMenuOption> menu = new List<FloatMenuOption>
-            {
-                // TODO: Implement select dialog
-                new FloatMenuOption("Select...", delegate { }),
-                // TODO: Add saved colors (from select)
-                new FloatSubMenu("Favorite",   FavoriteSubMenu(add)),
-                new FloatSubMenu("Ideoligion", IdeoSubMenu(add))
-            };
-            Find.WindowStack.Add(new FloatMenu(menu)
-            {
-                vanishIfMouseDistant = false
-            });
-        }
-
-        private static List<FloatMenuOption> FavoriteSubMenu(BillAddition add) =>
-            SubMenuItems(Find.CurrentMap.mapPawns.FreeColonists, p => p.story.favoriteColor.Value, add);
-        private static List<FloatMenuOption> IdeoSubMenu(BillAddition add) =>
-            SubMenuItems(Find.IdeoManager.IdeosInViewOrder, i => i.ApparelColor, add);
-
-        private static List<FloatMenuOption> SubMenuItems<T>(IEnumerable<T> items, Func<T, Color> getColor, BillAddition add)
-        {
-            List<FloatMenuOption> menu = new List<FloatMenuOption>();
-            foreach (T item in items)
-            {
-                Color color = getColor(item);
-                menu.Add(new FloatMenuOption(
-                    item.ToString(),
-                    delegate { add.TargetColor = color; }, 
-                    BaseContent.WhiteTex, 
-                    color));
-            }
-            return menu;
         }
 
         private static bool ShouldApply(Bill_Production bill)

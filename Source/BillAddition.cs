@@ -6,20 +6,25 @@ using Verse;
 
 namespace CraftWithColor
 {
-    internal class BillAddition : IExposable
+    internal class BillAddition : IExposable, ITargetColor
     {
         private RecipeDef coloredRecipie;
         private RecipeDef originalRecipe;
-
+        private Color targetColor;
+        
         public bool active = false;
-        public Color TargetColor = DefaultColor;
-        public static Color DefaultColor = Color.white;
+        
+        public Color TargetColor 
+        { 
+            get => targetColor; set => targetColor = value; 
+        }
 
         public BillAddition() { }
 
         public BillAddition(RecipeDef originalRecipe)
         {
             this.originalRecipe = originalRecipe;
+            targetColor = State.DefaultColor;
         }
 
         public RecipeDef ColoredRecipie
@@ -118,7 +123,7 @@ namespace CraftWithColor
         public void ExposeData()
         {
             Scribe_Values.Look(ref active, "active", false);
-            Scribe_Values.Look(ref TargetColor, "color", DefaultColor);
+            Scribe_Values.Look(ref targetColor, "color", forceSave: true);
             Scribe_Defs.Look(ref originalRecipe, "recipie");
         }
     }
