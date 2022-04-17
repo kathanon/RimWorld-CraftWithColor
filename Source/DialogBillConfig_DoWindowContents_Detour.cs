@@ -51,9 +51,11 @@ namespace CraftWithColor
         {
             List< FloatMenuOption> menu = new List<FloatMenuOption>
             {
+                // TODO: Implement select dialog
                 new FloatMenuOption("Select...", delegate { }),
-                new FloatSubMenu("Favorite", FavoriteSubMenu(add)),
-                new FloatSubMenu("Ideo",     IdeoSubMenu(add))
+                // TODO: Add saved colors (from select)
+                new FloatSubMenu("Favorite",   FavoriteSubMenu(add)),
+                new FloatSubMenu("Ideoligion", IdeoSubMenu(add))
             };
             Find.WindowStack.Add(new FloatMenu(menu)
             {

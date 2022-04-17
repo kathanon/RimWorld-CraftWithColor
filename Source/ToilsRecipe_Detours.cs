@@ -47,8 +47,10 @@ namespace CraftWithColor
                 toil.initAction = delegate
                 {
                     Job curJob = toil.actor.jobs.curJob;
-                    State.LastFinishedBill = curJob.bill as Bill_Production;
+                    Bill_Production bill = curJob.bill as Bill_Production;
+                    State.LastFinishedBill = bill;
                     original();
+                    State.UnsetLastFinishedBillIf(bill);
                 };
             }
             return toil;

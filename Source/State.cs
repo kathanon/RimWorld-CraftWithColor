@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
@@ -7,29 +8,46 @@ namespace CraftWithColor
 {
     internal class State
     {
-        private static Dictionary<Bill_Production, BillAddition> billDict = new Dictionary<Bill_Production, BillAddition>();
-        private static Dictionary<RecipeDef, BillAddition> recipieDict = new Dictionary<RecipeDef, BillAddition>();
+        private static Dictionary<Bill_Production, BillAddition> dict = new Dictionary<Bill_Production, BillAddition>();
         public static Bill_Production LastFinishedBill = null;
 
-        public static Color? ColorForLast => ColorFor(LastFinishedBill);
+        internal static void UnsetLastFinishedBillIf(Bill_Production bill)
+        {
+            if (LastFinishedBill == bill)
+            {
+                LastFinishedBill = null;
+            }
+        }
 
         // TODO: save/load additions
         // TODO: remove additions for old bills
 
         internal static BillAddition GetAddition(Bill_Production bill)
         {
-            if (!billDict.ContainsKey(bill))
+            if (!dict.ContainsKey(bill))
             {
-                billDict[bill] = new BillAddition(bill.recipe);
+                dict[bill] = new BillAddition(bill.recipe);
             }
-            return billDict[bill];
+            return dict[bill];
+        }
+
+        public static Color? ColorForLast(ThingDef def)
+        {
+            foreach (var product in LastFinishedBill.recipe.products)
+            {
+                if (product.thingDef == def)
+                {
+                    return ColorFor(LastFinishedBill);
+                }
+            }
+            return null;
         }
 
         internal static Color? ColorFor(Bill bill)
         {
             if (bill is Bill_Production)
             {
-                if (billDict.TryGetValue(bill as Bill_Production, out BillAddition add))
+                if (dict.TryGetValue(bill as Bill_Production, out BillAddition add))
                 {
                     if (add.active)
                     {
@@ -38,11 +56,6 @@ namespace CraftWithColor
                 }
             }
             return null;
-        }
-
-        internal static void RecipieCreated(BillAddition add)
-        {
-            recipieDict.Add(add.ColoredRecipie, add);
         }
     }
 

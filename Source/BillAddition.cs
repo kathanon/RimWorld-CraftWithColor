@@ -26,7 +26,6 @@ namespace CraftWithColor
                 if (coloredRecipie == null)
                 {
                     coloredRecipie = CreateColoredRecipie(OriginalRecipe);
-                    State.RecipieCreated(this);
                 }
                 return coloredRecipie;
             }
@@ -48,7 +47,6 @@ namespace CraftWithColor
             RecipeDef res = CopyRecipeFields(original);
             res.generated = true;
             res.defName = original.defName + "_kathanon_CraftWithColor_colored";
-            res.shortHash = (ushort)(original.shortHash ^ 841);
             res.useIngredientsForColor = false;
             res.ingredients = AmendIngredients(original.ingredients);
             return res;
@@ -85,6 +83,7 @@ namespace CraftWithColor
                 requiredGiverWorkType = original.requiredGiverWorkType,
                 researchPrerequisite = original.researchPrerequisite,
                 researchPrerequisites = original.researchPrerequisites,
+                shortHash = original.shortHash,
                 skillRequirements = original.skillRequirements,
                 soundWorking = original.soundWorking,
                 specialProducts = original.specialProducts,
@@ -106,28 +105,8 @@ namespace CraftWithColor
             dye.filter = new ThingFilter();
             dye.filter.SetAllow(ThingDefOf.Dye, true);
             dye.SetBaseCount(1);
-            dye.SetBaseCount(1);
 
-            var ingredients = new List<IngredientCount>(original);
-            ingredients.Add(dye);
-            return ingredients;
-        }
-
-        private static List<ThingDefCountClass> ReplaceProducts(List<ThingDefCountClass> original)
-        {
-            var replaced = new List<ThingDefCountClass>(original.Count);
-            foreach (var product in original)
-            {
-                ThingDef thingDef = product.thingDef;
-                
-                replaced.Add(new ThingDefCountClass(thingDef, product.count));
-            }
-            throw new NotImplementedException();
-        }
-
-        private static ThingDef ReplaceUnfinished(ThingDef def)
-        {
-            throw new NotImplementedException();
+            return new List<IngredientCount>(original) { dye };
         }
     }
 
