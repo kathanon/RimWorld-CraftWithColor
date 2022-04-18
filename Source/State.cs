@@ -60,11 +60,14 @@ namespace CraftWithColor
 
         public static Color? ColorForLast(ThingDef def)
         {
-            foreach (var product in LastFinishedBill.recipe.products)
+            if (def != null)
             {
-                if (product.thingDef == def)
+                foreach (var product in LastFinishedBill.recipe.products)
                 {
-                    return ColorFor(LastFinishedBill);
+                    if (product.thingDef == def)
+                    {
+                        return ColorFor(LastFinishedBill);
+                    }
                 }
             }
             return null;

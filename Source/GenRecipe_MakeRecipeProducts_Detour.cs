@@ -15,7 +15,7 @@ namespace CraftWithColor
 
         private static void Process(Thing thing)
         {
-            Color? color = State.ColorForLast(thing.def);
+            Color? color = State.ColorForLast(thing?.def);
             if (color.HasValue)
             {
                 thing.TryGetComp<CompColorable>()?.SetColor(color.Value);
