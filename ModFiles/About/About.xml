@@ -20,7 +20,6 @@
 		<li>
 			<packageId>Ludeon.RimWorld.Ideology</packageId>
 			<displayName>Ideology</displayName>
-			<steamAppId>1392840</steamAppId>
 		</li>
 	</modDependencies>
 	<loadAfter>
