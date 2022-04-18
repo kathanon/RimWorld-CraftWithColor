@@ -7,7 +7,9 @@ namespace CraftWithColor
 {
     internal interface ITargetColor
     {
-        Color TargetColor { set; }
+        Color TargetColor { get; set; }
+
+        bool Update { get; }
     }
 
     internal class ColorMenu
@@ -17,16 +19,16 @@ namespace CraftWithColor
             List<FloatMenuOption> menu = new List<FloatMenuOption>();
             if (add is BillAddition)
             {
-                menu.Add(new FloatMenuOption("Select...", () => SelectColorDialog.Open(add as BillAddition)));
-                if (State.SavedColors.Count > 0)
+                menu.Add(new FloatMenuOption(Strings.Select, () => SelectColorDialog.Open(add as BillAddition)));
+                if (State.SavedColors.Count > 0 && !MySettings.OnlyStandard)
                 {
-                    menu.Add(new FloatSubMenu("Saved colors", SubMenuItems(State.SavedColors, c => c, c => " ", add)));
+                    menu.Add(new FloatSubMenu(Strings.SavedColors, SubMenuItems(State.SavedColors, c => c, c => " ", add)));
                 }
             }
-            menu.Add(new FloatSubMenu("Favorite", FavoriteSubMenu(add)));
+            menu.Add(new FloatSubMenu(Strings.Favorite, FavoriteSubMenu(add)));
             if (!Find.IdeoManager.classicMode)
             {
-                menu.Add(new FloatSubMenu("Ideoligion", IdeoSubMenu(add)));
+                menu.Add(new FloatSubMenu(Strings.Ideoligion, IdeoSubMenu(add)));
             }
             Find.WindowStack.Add(new FloatMenu(menu)
             {

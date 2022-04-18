@@ -1,5 +1,4 @@
 ﻿using RimWorld;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -58,6 +57,14 @@ namespace CraftWithColor
             }
         }
 
+        public static void UpdateAll()
+        {
+            foreach (var pair in dict)
+            {
+                pair.Value.UpdateBill(pair.Key as Bill_Production);
+            }
+        }
+
         public static Color? ColorForLast(ThingDef def)
         {
             if (def != null)
@@ -73,27 +80,13 @@ namespace CraftWithColor
             return null;
         }
 
-        public static Color? ColorFor(Bill bill)
-        {
-            if (dict.TryGetValue(bill, out BillAddition add))
-            {
-                if (add.active)
-                {
-                    return add.TargetColor;
-                }
-            }
-            return null;
-        }
+        public static Color? ColorFor(Bill bill) => dict.TryGetValue(bill, out BillAddition add) ? add.ActiveColor: null;
 
-        public static void RemoveBill(Bill bill)
-        {
-            dict.Remove(bill);
-        }
+        public static void RemoveBill(Bill bill) => dict.Remove(bill);
 
         private static void CleanupBills()
         {
-            var toDelete = new List<Bill>(dict.Keys.Where(b => b.deleted || !(b is Bill_Production)));
-            foreach (var key in toDelete)
+            foreach (var key in dict.Keys.Where(b => b.deleted || !(b is Bill_Production)))
             {
                 dict.Remove(key);
             }
@@ -106,7 +99,7 @@ namespace CraftWithColor
                 CleanupBills();
             }
 
-            if (Scribe.EnterNode(Main.ModId)) {
+            if (Scribe.EnterNode(Strings.MOD_IDENTIFIER)) {
                 Scribe_Collections.Look(ref dict, "additions", LookMode.Reference, LookMode.Deep, ref save.addsKeyWorkList, ref save.addsValueWorkList);
                 Scribe_Collections.Look(ref savedColors, "savedColors", LookMode.Value, null);
                 Scribe.ExitNode();

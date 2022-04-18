@@ -1,5 +1,4 @@
 ﻿using HugsLib.Utils;
-using RimWorld;
 
 namespace CraftWithColor
 {
@@ -14,13 +13,11 @@ namespace CraftWithColor
 
         internal static Main Instance { get; private set; }
 
-        public const string ModId = "kathanon.CraftWithColor";
-
-        public override string ModIdentifier => ModId;
+        public override string ModIdentifier => Strings.MOD_IDENTIFIER;
 
         public override void DefsLoaded()
         {
-            // TODO: load settings
+            MySettings.Setup(Settings);
         }
     }
 }

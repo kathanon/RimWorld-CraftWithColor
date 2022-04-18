@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<kathanon.CraftWithColor.Select>Select...</kathanon.CraftWithColor.Select>
+	<kathanon.CraftWithColor.SavedColors>Saved colors</kathanon.CraftWithColor.SavedColors>
+	<kathanon.CraftWithColor.Favorite>Favorite</kathanon.CraftWithColor.Favorite>
+	<kathanon.CraftWithColor.Ideoligion>Ideoligion</kathanon.CraftWithColor.Ideoligion>
+	
+	<kathanon.CraftWithColor.DyeItem>Dye item</kathanon.CraftWithColor.DyeItem>
+	
+	<kathanon.CraftWithColor.SelectColor>Select color</kathanon.CraftWithColor.SelectColor>
+	<kathanon.CraftWithColor.R>R</kathanon.CraftWithColor.R>
+	<kathanon.CraftWithColor.G>G</kathanon.CraftWithColor.G>
+	<kathanon.CraftWithColor.B>B</kathanon.CraftWithColor.B>
+	<kathanon.CraftWithColor.Standard>Standard</kathanon.CraftWithColor.Standard>
+	<kathanon.CraftWithColor.Saved>Saved</kathanon.CraftWithColor.Saved>
+	<kathanon.CraftWithColor.Delete>Delete</kathanon.CraftWithColor.Delete>
+	<kathanon.CraftWithColor.Save>Save</kathanon.CraftWithColor.Save>
+	<kathanon.CraftWithColor.Cancel>Cancel</kathanon.CraftWithColor.Cancel>
+	<kathanon.CraftWithColor.Accept>Accept</kathanon.CraftWithColor.Accept>
+
+	<kathanon.CraftWithColor.More>More...</kathanon.CraftWithColor.More>
+
+	<kathanon.CraftWithColor.OnlyStandard.title>Only use standard colors</kathanon.CraftWithColor.OnlyStandard.title>
+	<kathanon.CraftWithColor.OnlyStandard.desc>Limit the colors that can be chosen to the ones that can normally be chosen in the styling station. Does not affect already selected colors.</kathanon.CraftWithColor.OnlyStandard.desc>
+	<kathanon.CraftWithColor.Styling.title>Also add to styling station</kathanon.CraftWithColor.Styling.title>
+	<kathanon.CraftWithColor.Styling.desc>Add a menu to the color selection in the styling station to allow selecting any color there as well.</kathanon.CraftWithColor.Styling.desc>
+	<kathanon.CraftWithColor.RequireDye.title>Reqire dye for craft</kathanon.CraftWithColor.RequireDye.title>
+	<kathanon.CraftWithColor.RequireDye.desc>When setting a craft to be dyed, 1 dye will be added to the ingredients list.</kathanon.CraftWithColor.RequireDye.desc>
+</LanguageData>

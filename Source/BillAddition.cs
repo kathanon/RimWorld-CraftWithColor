@@ -19,6 +19,10 @@ namespace CraftWithColor
             get => targetColor; set => targetColor = value; 
         }
 
+        public Color? ActiveColor { get => active ? (Color?) targetColor : null; }
+
+        public bool Update { get => true; }
+
         public BillAddition() { }
 
         public BillAddition(RecipeDef originalRecipe)
@@ -39,7 +43,7 @@ namespace CraftWithColor
             }
         }
 
-        public RecipeDef Recipie => active ? ColoredRecipie : OriginalRecipe;
+        public RecipeDef Recipie => (active && MySettings.RequireDye) ? ColoredRecipie : OriginalRecipe;
 
         public RecipeDef OriginalRecipe => originalRecipe;
 

@@ -1,11 +1,7 @@
 ﻿using HarmonyLib;
 using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Verse;
-using Verse.AI;
 
 namespace CraftWithColor
 {
@@ -25,6 +21,7 @@ namespace CraftWithColor
                 BillAddition add = State.GetAddition(___bill);
                 DrawWidgets(inRect, add);
                 add.UpdateBill(___bill);
+                Widgets_DefIcon_Detour.Next(add.ActiveColor);
             }
             return true;
         }
@@ -36,7 +33,7 @@ namespace CraftWithColor
             Rect labelRect = new Rect(0f, top + (WidgetsHeight - LabelHeight) / 2, width - ColorSpace, LabelHeight);
             Rect colorRect = new Rect(width - ColorSize, top, ColorSize, ColorSize);
             Text.Font = GameFont.Small;
-            Widgets.CheckboxLabeled(labelRect, "Dye item", ref add.active, placeCheckboxNearText: false);
+            Widgets.CheckboxLabeled(labelRect, Strings.DyeItem, ref add.active, placeCheckboxNearText: false);
             if (add.active)
             {
                 if (Widgets.ButtonInvisible(colorRect))
@@ -44,6 +41,10 @@ namespace CraftWithColor
                     ColorMenu.Open(add);
                 }
                 Widgets.DrawBoxSolid(colorRect, add.TargetColor);
+                Color old = GUI.color;
+                GUI.color = SelectColorDialog.Dimmed(old);
+                Widgets.DrawBox(colorRect);
+                GUI.color = old;
             }
         }
 

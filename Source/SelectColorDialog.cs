@@ -9,22 +9,42 @@ namespace CraftWithColor
 {
     internal class SelectColorDialog : Window, ITargetColor
     {
-        private BillAddition add;
+        private static Rect lastWindowRect;
+
+        private readonly ITargetColor target;
+        private readonly Color originalColor;
+        private readonly List<Color> standardColors;
+
         private Color color;
 
-        public SelectColorDialog(BillAddition add)
+        public SelectColorDialog(ITargetColor target, List<Color> standardColors = null)
         {
-            this.add = add;
-            color = add.TargetColor;
+            this.target = target;
+            originalColor = color = target.TargetColor;
+            this.standardColors = standardColors;
             doCloseX = true;
             closeOnClickedOutside = true;
             draggable = true;
         }
 
-        public Color TargetColor { set => color = value; }
+        public Color TargetColor
+        {
+            get => color;
+            set
+            {
+                color = value;
+                if (target.Update)
+                {
+                    target.TargetColor = value;
+                }
+            }
+        }
+
+        public bool Update { get => false; }
 
         public void Cancel()
         {
+            CancelColor();
             Close();
         }
 
@@ -34,16 +54,52 @@ namespace CraftWithColor
             Close();
         }
 
+        public void CancelColor()
+        {
+            if (target.Update)
+            {
+                target.TargetColor = originalColor;
+                color = originalColor;
+            }
+        }
+
         public void AcceptColor()
         {
-            add.TargetColor = color;
+            target.TargetColor = color;
+        }
+
+        public override void OnCancelKeyPressed()
+        {
+            CancelColor();
+            base.OnCancelKeyPressed();
         }
 
         public override void OnAcceptKeyPressed()
         {
-            Accept();
+            AcceptColor();
             base.OnAcceptKeyPressed();
         }
+
+        public override void PostClose()
+        {
+            lastWindowRect = windowRect;
+            base.PostClose();
+        }
+
+        protected override void SetInitialSizeAndPosition()
+        {
+            base.SetInitialSizeAndPosition();
+            if (lastWindowRect.width > 0)
+            {
+                windowRect = lastWindowRect;
+            }
+            else
+            {
+                windowRect.x += 200f;
+            }
+        }
+
+        public List<Color> StandardColors { get => standardColors ?? DefaultColors; }
 
         public List<Color> DefaultColors
         {
@@ -53,7 +109,7 @@ namespace CraftWithColor
                 {
                     defaultColorsCache = (
                         from x in DefDatabase<ColorDef>.AllDefsListForReading 
-                        where !x.hairOnly 
+                        where !x.hairOnly
                         select x.color
                         ).ToList();
                 }
@@ -99,15 +155,22 @@ namespace CraftWithColor
         private Color normalColor;
         private Color dimmedColor;
 
+        public static Color Dimmed(Color color) => color * dimmedMult;
+
         public const int SavedColorsMax = ColorListSavedRows * ColorListColumns;
 
         public override void DoWindowContents(Rect inRect)
         {
-            bool saved = State.SavedColors.Contains(color);
+            if (target.Update && target.TargetColor != color)
+            {
+                color = target.TargetColor;
+            }
+
+            bool saved = State.SavedColors.FindIndex(c => c.IndistinguishableFrom(color)) > -1;
             bool savedMax = State.SavedColors.Count >= SavedColorsMax;
 
             normalColor = GUI.color;
-            dimmedColor = normalColor * dimmedMult;
+            dimmedColor = Dimmed(normalColor);
 
             Rect labelRect = inRect.TopPartPixels(DialogLabelHeight).ContractedBy(DialogMarginAdjust, 0f);
             inRect = inRect.BottomPartPixels(inRect.height - DialogLabelHeight).ContractedBy(DialogMarginAdjust);
@@ -119,26 +182,40 @@ namespace CraftWithColor
             TextAnchor anchor = Text.Anchor;
 
             Text.Font = GameFont.Medium;
-            Widgets.Label(labelRect, "Select color");
+            Widgets.Label(labelRect, Strings.SelectColor);
             Text.Font = GameFont.Small;
             
             Widgets.DrawBoxSolid(colorRect, color);
             if (Widgets.ButtonInvisible(colorRect)) ColorMenu.Open(this);
 
-            Text.Anchor = TextAnchor.MiddleLeft;
-            ColorSlider(sliderRect[0], "R", ref color.r);
-            ColorSlider(sliderRect[1], "G", ref color.g);
-            ColorSlider(sliderRect[2], "B", ref color.b);
+            if (!MySettings.OnlyStandard)
+            {
+                Text.Anchor = TextAnchor.MiddleLeft;
+                ColorSlider(sliderRect[0], Strings.R, ref color.r);
+                ColorSlider(sliderRect[1], Strings.G, ref color.g);
+                ColorSlider(sliderRect[2], Strings.B, ref color.b);
+            }
 
             Text.Anchor = TextAnchor.UpperLeft;
-            ColorSelector(ref colorList, "Standard", DefaultColors, ColorListStandardRows);
-            ColorSelector(ref colorList, "Saved", State.SavedColors, ColorListSavedRows);
+            ColorSelector(ref colorList, Strings.Standard, DefaultColors, ColorListStandardRows);
+            if (!MySettings.OnlyStandard)
+            {
+                ColorSelector(ref colorList, Strings.Saved, State.SavedColors, ColorListSavedRows);
+            }
 
             Text.Anchor = anchor;
-            DisablableButton(buttonRect[0], "Delete", () => State.SavedColors.Remove(color), saved);
-            DisablableButton(buttonRect[1], "Save",   () => State.SavedColors.Add(color),    !saved && !savedMax);
-            DisablableButton(buttonRect[2], "Cancel", Cancel);
-            DisablableButton(buttonRect[3], "Accept", Accept);
+            if (!MySettings.OnlyStandard)
+            {
+                DisablableButton(buttonRect[0], Strings.Delete, () => State.SavedColors.Remove(color), saved);
+                DisablableButton(buttonRect[1], Strings.Save, () => State.SavedColors.Add(color), !saved && !savedMax);
+            }
+            DisablableButton(buttonRect[2], Strings.Cancel, Cancel);
+            DisablableButton(buttonRect[3], Strings.Accept, Accept);
+
+            if (target.Update && target.TargetColor != color)
+            {
+                target.TargetColor = color;
+            }
         }
 
         private void ColorSlider(Rect rect, string label, ref float value)
@@ -159,6 +236,7 @@ namespace CraftWithColor
             GUI.color = normalColor;
 
             Widgets.Label(innerRect.TopPartPixels(ColorListLabelHeight), label);
+            Widgets_ColorSelector_Detour.Skip();
             Widgets.ColorSelector(innerRect.BottomPartPixels(colorsHeight), ref color, list);
 
             rect.y += rect.height + Gap;
@@ -172,9 +250,9 @@ namespace CraftWithColor
             if (pressed) action();
         }
 
-        internal static void Open(BillAddition add)
+        internal static void Open(ITargetColor target, List<Color> standardColors = null)
         {
-            Find.WindowStack.Add(new SelectColorDialog(add));
+            Find.WindowStack.Add(new SelectColorDialog(target, standardColors));
         }
     }
 }
