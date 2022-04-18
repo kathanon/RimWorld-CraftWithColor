@@ -9,4 +9,22 @@
 
 1 dye is added to the ingredients (same cost as dyeing it later).</description>
 	<url>https://github.com/kathanon/RimWorld-CraftWithColor</url>
+
+	<modDependencies>
+		<li>
+			<packageId>UnlimitedHugs.HugsLib</packageId>
+			<displayName>HugsLib</displayName>
+			<downloadUrl>https://github.com/UnlimitedHugs/RimworldHugsLib/releases/latest</downloadUrl>
+			<steamWorkshopUrl>steam://url/CommunityFilePage/818773962</steamWorkshopUrl>
+		</li>
+		<li>
+			<packageId>Ludeon.RimWorld.Ideology</packageId>
+			<displayName>Ideology</displayName>
+			<steamAppId>1392840</steamAppId>
+		</li>
+	</modDependencies>
+	<loadAfter>
+		<li>UnlimitedHugs.HugsLib</li>
+		<li>Ludeon.RimWorld.Ideology</li>
+	</loadAfter>
 </ModMetaData>
