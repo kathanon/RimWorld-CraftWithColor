@@ -8,6 +8,11 @@ namespace CraftWithColor
         // Non-translated constants
         public const string MOD_IDENTIFIER = "kathanon.CraftWithColor";
         public const string PREFIX = MOD_IDENTIFIER + ".";
+        public static readonly Dictionary<string, Range> MODS_CONFLICTING_WITH_CHECKBOX_POS = new Dictionary<string, Range>
+        {
+            // Range is distance from bottom margin of dialog
+            { "falconne.bwm", new Range(67f, 30f) }
+        };
 
         // Menus and dialogs
         public static readonly string Select      = (PREFIX + "Select"     ).Translate();
