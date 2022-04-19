@@ -1,5 +1,6 @@
 ﻿using HugsLib.Utils;
 
+
 namespace CraftWithColor
 {
     public class Main : HugsLib.ModBase

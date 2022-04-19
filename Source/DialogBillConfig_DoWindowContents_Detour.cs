@@ -50,7 +50,7 @@ namespace CraftWithColor
 
         private static bool ShouldApply(Bill_Production bill)
         {
-            return bill.recipe.ProducedThingDef.comps.Find(c => c.compClass == typeof(CompColorable)) != null;
+            return bill?.recipe?.ProducedThingDef?.comps?.Find(c => c.compClass == typeof(CompColorable)) != null;
         }
     }
 }

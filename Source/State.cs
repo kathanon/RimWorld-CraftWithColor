@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using HugsLib.Utils;
+using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -65,11 +66,13 @@ namespace CraftWithColor
             }
         }
 
+        private static readonly List<ThingDefCountClass> ColorForLast_EMPTY = new List<ThingDefCountClass>();
+
         public static Color? ColorForLast(ThingDef def)
         {
             if (def != null)
             {
-                foreach (var product in LastFinishedBill.recipe.products)
+                foreach (var product in LastFinishedBill?.recipe?.products ?? ColorForLast_EMPTY)
                 {
                     if (product.thingDef == def)
                     {
@@ -82,7 +85,13 @@ namespace CraftWithColor
 
         public static Color? ColorFor(Bill bill) => dict.TryGetValue(bill, out BillAddition add) ? add.ActiveColor: null;
 
-        public static void RemoveBill(Bill bill) => dict.Remove(bill);
+        public static void RemoveBill(Bill bill)
+        {
+            if (bill != null)
+            {
+                dict.Remove(bill);
+            }
+        }
 
         private static void CleanupBills()
         {

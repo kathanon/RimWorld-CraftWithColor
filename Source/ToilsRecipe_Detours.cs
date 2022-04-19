@@ -41,13 +41,13 @@ namespace CraftWithColor
         public static Toil Postfix(Toil __result)
         {
             Toil toil = __result;
-            Action original = toil.initAction;
+            Action original = toil?.initAction;
             if (original != null)
             {
                 toil.initAction = delegate
                 {
-                    Job curJob = toil.actor.jobs.curJob;
-                    Bill_Production bill = curJob.bill as Bill_Production;
+                    Job curJob = toil?.actor?.jobs?.curJob;
+                    Bill_Production bill = curJob?.bill as Bill_Production;
                     State.LastFinishedBill = bill;
                     original();
                     State.UnsetLastFinishedBillIf(bill);

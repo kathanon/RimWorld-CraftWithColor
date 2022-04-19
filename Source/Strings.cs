@@ -1,9 +1,11 @@
-﻿using Verse;
+﻿using System.Collections.Generic;
+using Verse;
 
 namespace CraftWithColor
 {
     internal static class Strings
     {
+        // Non-translated constants
         public const string MOD_IDENTIFIER = "kathanon.CraftWithColor";
         public const string PREFIX = MOD_IDENTIFIER + ".";
 

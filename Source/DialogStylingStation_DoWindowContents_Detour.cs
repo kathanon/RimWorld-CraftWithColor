@@ -42,23 +42,26 @@ namespace CraftWithColor
                         Widgets_ColorSelector_Detour.Add(hairTarget);
                         break;
                     case StylingTab.ApparelColor:
-                        // Remove any stale entries
-                        apparelTargets.RemoveAll(p => !___apparelColors.ContainsKey(p.Key));
-                        // Add any missing and reset
-                        foreach (var target in ___apparelColors)
+                        if (___pawn != null && ___apparelColors != null)
                         {
-                            if (!apparelTargets.ContainsKey(target.Key))
+                            // Remove any stale entries
+                            apparelTargets.RemoveAll(p => !___apparelColors.ContainsKey(p.Key));
+                            // Add any missing and reset
+                            foreach (var target in ___apparelColors)
                             {
-                                apparelTargets.Add(target.Key, new Target());
+                                if (!apparelTargets.ContainsKey(target.Key))
+                                {
+                                    apparelTargets.Add(target.Key, new Target());
+                                }
+                                apparelTargets[target.Key].Reset(target.Value);
                             }
-                            apparelTargets[target.Key].Reset(target.Value);
-                        }
-                        // Register in same order as in dialog
-                        foreach (Apparel item in ___pawn.apparel.WornApparel)
-                        {
-                            if (!___pawn.apparel.IsLocked(item))
+                            // Register in same order as in dialog
+                            foreach (Apparel item in ___pawn.apparel.WornApparel)
                             {
-                                Widgets_ColorSelector_Detour.Add(apparelTargets[item]);
+                                if (!___pawn.apparel.IsLocked(item))
+                                {
+                                    Widgets_ColorSelector_Detour.Add(apparelTargets[item]);
+                                }
                             }
                         }
                         break;
@@ -104,7 +107,7 @@ namespace CraftWithColor
             {
                 if (updated)
                 {
-                    if (dict.ContainsKey(key))
+                    if (dict != null && key != null && dict.ContainsKey(key))
                     {
                         dict[key] = color;
                     }

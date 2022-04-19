@@ -1,4 +1,6 @@
 ﻿using HugsLib.Settings;
+using System.Linq;
+using Verse;
 
 namespace CraftWithColor
 {
