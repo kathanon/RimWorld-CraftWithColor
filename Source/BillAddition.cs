@@ -11,12 +11,20 @@ namespace CraftWithColor
         private RecipeDef coloredRecipie;
         private RecipeDef originalRecipe;
         private Color targetColor;
-        
+        private Bill_Production bill;
+
         public bool active = false;
         
         public Color TargetColor 
         { 
-            get => targetColor; set => targetColor = value; 
+            get => targetColor;
+            set {
+                if (!value.IndistinguishableFrom(targetColor))
+                {
+                    targetColor = value;
+                    TriggerRecolor();
+                }
+            }
         }
 
         public Color? ActiveColor { get => active ? (Color?) targetColor : null; }
@@ -25,10 +33,25 @@ namespace CraftWithColor
 
         public BillAddition() { }
 
-        public BillAddition(RecipeDef originalRecipe)
+        public BillAddition(Bill_Production bill)
         {
-            this.originalRecipe = originalRecipe;
+            this.bill = bill;
+            originalRecipe = bill.recipe;
             targetColor = State.DefaultColor;
+        }
+
+        public BillAddition(Bill_Production bill, BillAddition copyFrom)
+        {
+            this.bill = bill;
+            CopyFrom(copyFrom);
+        }
+
+        public void CopyFrom(BillAddition copyFrom)
+        {
+            originalRecipe = copyFrom.originalRecipe;
+            targetColor = copyFrom.targetColor;
+            coloredRecipie = copyFrom.coloredRecipie;
+            active = copyFrom.active;
         }
 
         public RecipeDef ColoredRecipie
@@ -38,6 +61,7 @@ namespace CraftWithColor
                 if (coloredRecipie == null)
                 {
                     coloredRecipie = CreateColoredRecipie(OriginalRecipe);
+                    AddToRecipieMap();
                 }
                 return coloredRecipie;
             }
@@ -47,14 +71,33 @@ namespace CraftWithColor
 
         public RecipeDef OriginalRecipe => originalRecipe;
 
-        public void UpdateBill(Bill_Production bill)
+        public void TriggerRecolor()
+        {
+            if (active && MySettings.SwitchColor)
+            {
+                Pawn pawn = bill.billStack?.billGiver?.Map.mapPawns.FreeColonists.Find(p => p.CurJob.bill == bill);
+                pawn?.RetriggerCurrentJob();
+            }
+        }
+
+        public void UpdateBill()
         {
             bill.recipe = Recipie;
         }
 
-        public void ResetBill(Bill_Production bill)
+        public void ResetBill()
         {
-            bill.recipe = OriginalRecipe;
+            bill.recipe = originalRecipe;
+        }
+
+        public void AddToRecipieMap()
+        {
+            State.AddToRecipieMap(coloredRecipie, originalRecipe);
+        }
+
+        public void RemoveFromRecipieMap()
+        {
+            State.RemoveFromRecipieMap(coloredRecipie);
         }
 
         private static RecipeDef CreateColoredRecipie(RecipeDef original)
@@ -129,6 +172,14 @@ namespace CraftWithColor
             Scribe_Values.Look(ref active, "active", false);
             Scribe_Values.Look(ref targetColor, "color", forceSave: true);
             Scribe_Defs.Look(ref originalRecipe, "recipie");
+        }
+
+        public void SetBillAfterLoad(Bill_Production bill)
+        {
+            if (this.bill == null)
+            {
+                this.bill = bill;
+            }
         }
     }
 

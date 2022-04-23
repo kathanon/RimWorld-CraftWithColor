@@ -186,7 +186,10 @@ namespace CraftWithColor
             Text.Font = GameFont.Small;
             
             Widgets.DrawBoxSolid(colorRect, color);
-            if (Widgets.ButtonInvisible(colorRect)) ColorMenu.Open(this);
+            if (MySettings.WithIdeology && Widgets.ButtonInvisible(colorRect))
+            {
+                ColorMenu.Open(this);
+            }
 
             if (!MySettings.OnlyStandard)
             {
@@ -197,7 +200,10 @@ namespace CraftWithColor
             }
 
             Text.Anchor = TextAnchor.UpperLeft;
-            ColorSelector(ref colorList, Strings.Standard, DefaultColors, ColorListStandardRows);
+            if (MySettings.WithIdeology)
+            {
+                ColorSelector(ref colorList, Strings.Standard, DefaultColors, ColorListStandardRows);
+            }
             if (!MySettings.OnlyStandard)
             {
                 ColorSelector(ref colorList, Strings.Saved, State.SavedColors, ColorListSavedRows);

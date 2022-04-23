@@ -19,13 +19,8 @@ Also allows using any color in the styling station, not just the predefined ones
 			<downloadUrl>https://github.com/UnlimitedHugs/RimworldHugsLib/releases/latest</downloadUrl>
 			<steamWorkshopUrl>steam://url/CommunityFilePage/818773962</steamWorkshopUrl>
 		</li>
-		<li>
-			<packageId>Ludeon.RimWorld.Ideology</packageId>
-			<displayName>Ideology</displayName>
-		</li>
 	</modDependencies>
 	<loadAfter>
 		<li>UnlimitedHugs.HugsLib</li>
-		<li>Ludeon.RimWorld.Ideology</li>
 	</loadAfter>
 </ModMetaData>

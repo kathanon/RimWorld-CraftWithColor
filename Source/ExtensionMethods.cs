@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+using Verse;
+using RimWorld;
+using Verse.AI;
 
 namespace CraftWithColor
 {
@@ -28,6 +31,18 @@ namespace CraftWithColor
                 result[i].x = rect.x + i * (width + gap);
             }
             return result;
+        }
+
+        public static void RetriggerCurrentJob(this Pawn pawn)
+        {
+            Pawn_JobTracker jobs = pawn.jobs;
+            if (jobs != null)
+            {
+                JobQueue queue = jobs.CaptureAndClearJobQueue();
+                Job job = JobMaker.MakeJob(JobDefOf.Goto, pawn.Position);
+                jobs.TryTakeOrderedJob(job);
+                jobs.RestoreCapturedJobs(queue);
+            }
         }
     }
 }

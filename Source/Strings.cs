@@ -8,10 +8,12 @@ namespace CraftWithColor
         // Non-translated constants
         public const string MOD_IDENTIFIER = "kathanon.CraftWithColor";
         public const string PREFIX = MOD_IDENTIFIER + ".";
+
+        public const string BWM_ID = "falconne.bwm";
         public static readonly Dictionary<string, Range> MODS_CONFLICTING_WITH_CHECKBOX_POS = new Dictionary<string, Range>
         {
             // Range is distance from bottom margin of dialog
-            { "falconne.bwm", new Range(67f, 30f) }
+            { BWM_ID, new Range(67f, 30f) }
         };
 
         // Menus and dialogs
@@ -39,5 +41,8 @@ namespace CraftWithColor
         public static readonly string Styling_desc       = (PREFIX + "Styling.desc"      ).Translate();
         public static readonly string RequireDye_title   = (PREFIX + "RequireDye.title"  ).Translate();
         public static readonly string RequireDye_desc    = (PREFIX + "RequireDye.desc"   ).Translate();
+        public static readonly string ChangeMode_title   = (PREFIX + "ChangeMode.title"  ).Translate();
+        public static readonly string ChangeMode_desc    = (PREFIX + "ChangeMode.desc"   ).Translate();
+        public static readonly string ChangeMode_prefix  =  PREFIX + "ChangeMode.";
     }
 }

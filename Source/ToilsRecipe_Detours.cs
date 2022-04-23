@@ -18,20 +18,31 @@ namespace CraftWithColor
             {
                 toil.initAction = delegate
                 {
-                    original();
-                    Job curJob = toil.actor.jobs.curJob;
-                    Color? color = State.ColorFor(curJob.bill);
-                    if (color.HasValue)
+                    Job job = toil.actor.jobs.curJob;
+                    Color? color = State.ColorFor(job.bill);
+                    bool createUnfinished = job.GetTarget(TargetIndex.B).Thing as UnfinishedThing == null;
+                    bool updateColor = !createUnfinished && NeedsUpdate(job, color);
+                    bool setColor = (createUnfinished && color != null) || updateColor;
+                    if (updateColor && MySettings.SwitchUseDye)
                     {
-                        Thing thing = curJob.GetTarget(TargetIndex.B).Thing;
-                        if (thing is UnfinishedThing)
-                        {
-                            thing.TryGetComp<CompColorable>()?.SetColor(color.Value);
-                        }
+                        // TODO: Add steps: take dye if available, otherwise skip switch
+                    }
+                    original();
+                    if (setColor)
+                    {
+                        ToilsUtil.GetColorable(job)?.SetColor(color.Value);
                     }
                 };
             }
             return toil;
+        }
+
+        private static bool NeedsUpdate(Job job, Color? color)
+        {
+            if (color == null || !MySettings.SwitchColor) return false;
+            var colorable = ToilsUtil.GetColorable(job);
+            if (colorable == null) return false;
+            return !colorable.Color.IndistinguishableFrom(color.Value);
         }
     }
 
@@ -49,11 +60,20 @@ namespace CraftWithColor
                     Job curJob = toil?.actor?.jobs?.curJob;
                     Bill_Production bill = curJob?.bill as Bill_Production;
                     State.LastFinishedBill = bill;
+                    State.LastFinishedBillColor = ToilsUtil.GetColorable(curJob)?.ActiveColor();
                     original();
                     State.UnsetLastFinishedBillIf(bill);
                 };
             }
             return toil;
         }
+    }
+
+    static class ToilsUtil
+    {
+        public static CompColorable GetColorable(Job job) =>
+            (job.GetTarget(TargetIndex.B).Thing as UnfinishedThing)?.TryGetComp<CompColorable>();
+
+        public static Color? ActiveColor(this CompColorable col) => col.Active ? (Color?) col.Color : null;
     }
 }

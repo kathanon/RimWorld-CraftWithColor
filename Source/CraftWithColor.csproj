@@ -39,6 +39,9 @@
       <HintPath>..\packages\UnlimitedHugs.Rimworld.HugsLib.9.0.1\lib\net472\HugsLib.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="ImprovedWorkbenches">
+      <HintPath>G:\Steam\steamapps\workshop\content\294100\935982361\Assemblies\ImprovedWorkbenches.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -58,8 +61,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BetterWorkbenchManagement__Detours.cs" />
     <Compile Include="BillAddition.cs" />
+    <Compile Include="BillProduction_Clone_Detour.cs" />
     <Compile Include="BillStack_Delete_Detour.cs" />
+    <Compile Include="ITabBills_FillTab_Detour.cs" />
     <Compile Include="ColorMenu.cs" />
     <Compile Include="DialogBillConfig_DoWindowContents_Detour.cs" />
     <Compile Include="DialogStylingStation_DoWindowContents_Detour.cs" />

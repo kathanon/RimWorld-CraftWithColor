@@ -26,7 +26,7 @@ namespace CraftWithColor
             {
                 BillAddition add = State.GetAddition(___bill);
                 DrawWidgets(inRect, add);
-                add.UpdateBill(___bill);
+                add.UpdateBill();
                 Widgets_DefIcon_Detour.Next(add.ActiveColor);
             }
             return true;
@@ -71,7 +71,14 @@ namespace CraftWithColor
                 {
                     if (Widgets.ButtonInvisible(colorRect))
                     {
-                        ColorMenu.Open(add);
+                        if (MySettings.WithIdeology)
+                        {
+                            ColorMenu.Open(add);
+                        } 
+                        else
+                        {
+                            SelectColorDialog.Open(add);
+                        }
                     }
                     Widgets.DrawBoxSolid(colorRect, add.TargetColor);
                     Color old = GUI.color;

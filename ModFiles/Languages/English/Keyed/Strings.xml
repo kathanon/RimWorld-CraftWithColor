@@ -26,4 +26,10 @@
 	<kathanon.CraftWithColor.Styling.desc>Add a menu to the color selection in the styling station to allow selecting any color there as well.</kathanon.CraftWithColor.Styling.desc>
 	<kathanon.CraftWithColor.RequireDye.title>Reqire dye for craft</kathanon.CraftWithColor.RequireDye.title>
 	<kathanon.CraftWithColor.RequireDye.desc>When setting a craft to be dyed, 1 dye will be added to the ingredients list.</kathanon.CraftWithColor.RequireDye.desc>
+	
+	<kathanon.CraftWithColor.ChangeMode.title>For unfinished item when color is changed...</kathanon.CraftWithColor.ChangeMode.title>
+	<kathanon.CraftWithColor.ChangeMode.desc>If the crafting bill is changed to use a new color while crafting the item is in progress, what should happen? (Only when an "unfinished" item is generated while crafting.)</kathanon.CraftWithColor.ChangeMode.desc>
+	<kathanon.CraftWithColor.ChangeMode.Keep>Keep the color</kathanon.CraftWithColor.ChangeMode.Keep>
+	<kathanon.CraftWithColor.ChangeMode.Switch>Switch the color</kathanon.CraftWithColor.ChangeMode.Switch>
+	<kathanon.CraftWithColor.ChangeMode.RequireDye>Consume 1 dye to switch the color</kathanon.CraftWithColor.ChangeMode.RequireDye>
 </LanguageData>
