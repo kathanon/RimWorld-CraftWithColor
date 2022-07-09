@@ -165,7 +165,8 @@ namespace CraftWithColor
 
         private static void CleanupBills()
         {
-            foreach (var key in dict.Keys.Where(b => b.deleted || !(b is Bill_Production)))
+            var toDelete = dict.Keys.Where(b => b.DeletedOrDereferenced || !(b is Bill_Production)).ToList();
+            foreach (var key in toDelete)
             {
                 RemoveBill(key);
             }
@@ -184,7 +185,7 @@ namespace CraftWithColor
                 Scribe.ExitNode();
             }
 
-            if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 CleanupBills();
                 foreach (var add in dict)

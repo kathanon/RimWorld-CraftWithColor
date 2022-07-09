@@ -1,4 +1,6 @@
 ﻿using HugsLib.Utils;
+using RimWorld;
+using Verse;
 
 
 namespace CraftWithColor
