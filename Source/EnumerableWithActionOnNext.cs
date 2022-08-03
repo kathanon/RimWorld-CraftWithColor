@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace CraftWithColor
 {
-    public static partial class GenRecipe_MakeRecipeProducts_Detour
+    public static partial class GenRecipe_MakeRecipeProducts_Patch
     {
         public class EnumerableWithActionOnNext<T> : IEnumerable<T>
         {

@@ -9,6 +9,8 @@
 Also allows using any color in the styling station, not just the predefined ones.
 
 1 dye is added to the ingredients when crafting specific color (same cost as dyeing it later, can be turned off in options).
+
+You can now also choose style for any item that has alternate styles.
 </description>
 	<url>https://github.com/kathanon/RimWorld-CraftWithColor</url>
 

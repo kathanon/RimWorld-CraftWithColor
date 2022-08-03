@@ -13,14 +13,17 @@ namespace CraftWithColor
         private static SettingHandle<bool> onlyStandard;
         private static SettingHandle<bool> requireDye;
         private static SettingHandle<bool> styling;
+        private static SettingHandle<bool> setStyle;
         private static SettingHandle<ColorChangeMode> changeMode;
         private static SettingHandle<ColorChangeModeNoIdeo> changeModeNoIdeo;
 
-        public static bool OnlyStandard { get => WithIdeology && onlyStandard; }
+        public static bool OnlyStandard => WithIdeology && onlyStandard;
 
-        public static bool RequireDye   { get => WithIdeology && requireDye; }
+        public static bool RequireDye   => WithIdeology && requireDye;
 
-        public static bool Styling      { get => WithIdeology && styling && !onlyStandard; }
+        public static bool Styling      => WithIdeology && styling && !onlyStandard;
+
+        public static bool SetStyle     => setStyle;
 
         public static bool SwitchColor
         {
@@ -41,12 +44,11 @@ namespace CraftWithColor
 
         public static void Setup(ModSettingsPack pack)
         {
-            if (WithIdeology)
-            {
+            if (WithIdeology) {
                 onlyStandard = pack.GetHandle(
-                    "onlyStandard", 
-                    Strings.OnlyStandard_title, 
-                    Strings.OnlyStandard_desc, 
+                    "onlyStandard",
+                    Strings.OnlyStandard_title,
+                    Strings.OnlyStandard_desc,
                     false);
                 styling = pack.GetHandle(
                     "styling",
@@ -58,6 +60,15 @@ namespace CraftWithColor
                     Strings.RequireDye_title,
                     Strings.RequireDye_desc,
                     true);
+            }
+
+            setStyle = pack.GetHandle(
+                "setStyle",
+                Strings.SetStyle_title,
+                Strings.SetStyle_desc,
+                true);
+
+            if (WithIdeology) {
                 changeMode = pack.GetHandle(
                     "changeMode",
                     Strings.ChangeMode_title,

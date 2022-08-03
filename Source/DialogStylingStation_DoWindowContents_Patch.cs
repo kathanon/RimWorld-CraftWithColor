@@ -8,7 +8,7 @@ using static RimWorld.Dialog_StylingStation;
 namespace CraftWithColor
 {
     [HarmonyPatch(typeof(Dialog_StylingStation), nameof(Dialog_StylingStation.DoWindowContents))]
-    public static class DialogStylingStation_DoWindowContents_Detour
+    public static class DialogStylingStation_DoWindowContents_Patch
     {
         private static readonly Target hairTarget = new Target();
         private static readonly Dictionary<Apparel, Target> apparelTargets = new Dictionary<Apparel, Target>();
@@ -39,7 +39,7 @@ namespace CraftWithColor
                 {
                     case StylingTab.Hair:
                         hairTarget.Reset(___desiredHairColor);
-                        Widgets_ColorSelector_Detour.Add(hairTarget);
+                        Widgets_ColorSelector_Patch.Add(hairTarget);
                         break;
                     case StylingTab.ApparelColor:
                         if (___pawn != null && ___apparelColors != null)
@@ -60,7 +60,7 @@ namespace CraftWithColor
                             {
                                 if (!___pawn.apparel.IsLocked(item))
                                 {
-                                    Widgets_ColorSelector_Detour.Add(apparelTargets[item]);
+                                    Widgets_ColorSelector_Patch.Add(apparelTargets[item]);
                                 }
                             }
                         }

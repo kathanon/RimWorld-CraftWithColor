@@ -6,7 +6,7 @@ using Verse;
 namespace CraftWithColor
 {
     [HarmonyPatch(typeof(Widgets), nameof(Widgets.ColorSelector))]
-    public static class Widgets_ColorSelector_Detour
+    public static class Widgets_ColorSelector_Patch
     {
         private static readonly Queue<ITargetColor> queue = new Queue<ITargetColor>();
         private static bool skip = false;

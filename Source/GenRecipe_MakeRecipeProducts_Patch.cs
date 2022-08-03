@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using RimWorld;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
@@ -6,7 +7,7 @@ using Verse;
 namespace CraftWithColor
 {
     [HarmonyPatch(typeof(GenRecipe), nameof(GenRecipe.MakeRecipeProducts))]
-    public static partial class GenRecipe_MakeRecipeProducts_Detour
+    public static partial class GenRecipe_MakeRecipeProducts_Patch
     {
         public static IEnumerable<Thing> Postfix(IEnumerable<Thing> result)
         {
@@ -21,6 +22,10 @@ namespace CraftWithColor
                 thing.TryGetComp<CompColorable>()?.SetColor(color.Value);
             }
 
+            ThingStyleDef style = State.StyleForLast(thing?.def);
+            if (style != null) {
+                thing.TryGetComp<CompStyleable>()?.SetStyle(style);
+            }
         }
     }
 }

@@ -6,6 +6,7 @@
 	<kathanon.CraftWithColor.Ideoligion>Ideoligion</kathanon.CraftWithColor.Ideoligion>
 	
 	<kathanon.CraftWithColor.DyeItem>Dye item</kathanon.CraftWithColor.DyeItem>
+	<kathanon.CraftWithColor.StyleItem>Style item</kathanon.CraftWithColor.StyleItem>
 	
 	<kathanon.CraftWithColor.SelectColor>Select color</kathanon.CraftWithColor.SelectColor>
 	<kathanon.CraftWithColor.R>R</kathanon.CraftWithColor.R>
@@ -24,6 +25,8 @@
 	<kathanon.CraftWithColor.OnlyStandard.desc>Limit the colors that can be chosen to the ones that can normally be chosen in the styling station. Does not affect already selected colors.</kathanon.CraftWithColor.OnlyStandard.desc>
 	<kathanon.CraftWithColor.Styling.title>Also add to styling station</kathanon.CraftWithColor.Styling.title>
 	<kathanon.CraftWithColor.Styling.desc>Add a menu to the color selection in the styling station to allow selecting any color there as well.</kathanon.CraftWithColor.Styling.desc>
+	<kathanon.CraftWithColor.SetStyle.title>Allow setting style if available</kathanon.CraftWithColor.SetStyle.title>
+	<kathanon.CraftWithColor.SetStyle.desc>If any styles are available for the item, allow setting style as well as color</kathanon.CraftWithColor.SetStyle.desc>
 	<kathanon.CraftWithColor.RequireDye.title>Reqire dye for craft</kathanon.CraftWithColor.RequireDye.title>
 	<kathanon.CraftWithColor.RequireDye.desc>When setting a craft to be dyed, 1 dye will be added to the ingredients list.</kathanon.CraftWithColor.RequireDye.desc>
 	
@@ -32,4 +35,7 @@
 	<kathanon.CraftWithColor.ChangeMode.Keep>Keep the color</kathanon.CraftWithColor.ChangeMode.Keep>
 	<kathanon.CraftWithColor.ChangeMode.Switch>Switch the color</kathanon.CraftWithColor.ChangeMode.Switch>
 	<kathanon.CraftWithColor.ChangeMode.RequireDye>Consume 1 dye to switch the color</kathanon.CraftWithColor.ChangeMode.RequireDye>
+  
+	<kathanon.CraftWithColor.NoSpaceError>Could not find valid place for dialog addition, conflicting mods:
+</kathanon.CraftWithColor.NoSpaceError>
 </LanguageData>

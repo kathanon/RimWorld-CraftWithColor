@@ -258,7 +258,7 @@ namespace CraftWithColor
             GUI.color = normalColor;
 
             Widgets.Label(innerRect.TopPartPixels(ColorListLabelHeight), label);
-            Widgets_ColorSelector_Detour.Skip();
+            Widgets_ColorSelector_Patch.Skip();
             Widgets.ColorSelector(innerRect.BottomPartPixels(colorsHeight), ref color, list);
 
             rect.y += rect.height + Gap;

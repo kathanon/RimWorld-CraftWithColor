@@ -1,65 +1,87 @@
 ﻿using RimWorld;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace CraftWithColor
-{
-    internal class BillAddition : IExposable, ITargetColor
-    {
+namespace CraftWithColor {
+    internal class BillAddition : IExposable, ITargetColor {
         private RecipeDef coloredRecipie;
         private RecipeDef originalRecipe;
         private Color targetColor;
         private Bill_Production bill;
+        private ThingStyleDef targetStyle;
+        private IEnumerable<ThingStyleDef> availableStyles;
+        private bool colorable;
 
-        public bool active = false;
-        
-        public Color TargetColor 
-        { 
+        public bool colorActive = false;
+        public bool styleActive = false;
+
+        public Color TargetColor {
             get => targetColor;
             set {
-                if (!value.IndistinguishableFrom(targetColor))
-                {
+                if (!value.IndistinguishableFrom(targetColor)) {
                     targetColor = value;
                     TriggerRecolor();
                 }
             }
         }
 
-        public Color? ActiveColor { get => active ? (Color?) targetColor : null; }
+        public Color? ActiveColor => colorActive ? (Color?) targetColor : null;
 
-        public bool Update { get => true; }
+        public IEnumerable<ThingStyleDef> Styles => availableStyles;
+
+        public ThingStyleDef TargetStyle {
+            get => targetStyle;
+            set {
+                if (availableStyles.Contains(value)) {
+                    targetStyle = value;
+                }
+            }
+        }
+
+        public bool UseStyle => styleActive && MySettings.SetStyle;
+
+        public ThingStyleDef ActiveStyle => UseStyle ? targetStyle : null;
+
+        public bool CanColor => colorable;
+
+        public bool CanStyle => availableStyles.Any() && MySettings.SetStyle;
+
+        public bool Update => true;
+
+        public ThingDef Thing => bill.recipe.ProducedThingDef;
 
         public BillAddition() { }
 
-        public BillAddition(Bill_Production bill)
-        {
-            this.bill = bill;
-            originalRecipe = bill.recipe;
-            targetColor = State.DefaultColor;
+        public BillAddition(Bill_Production bill) {
+            ThingDef thing = bill.recipe.ProducedThingDef;
+            this.bill       = bill;
+            originalRecipe  = bill.recipe;
+            targetColor     = State.DefaultColor;
+            colorable       = thing.HasComp(typeof(CompColorable));
+            availableStyles = State.StylesFor(thing);
+            targetStyle     = null;
         }
 
-        public BillAddition(Bill_Production bill, BillAddition copyFrom)
-        {
+        public BillAddition(Bill_Production bill, BillAddition copyFrom) {
             this.bill = bill;
             CopyFrom(copyFrom);
         }
 
-        public void CopyFrom(BillAddition copyFrom)
-        {
-            originalRecipe = copyFrom.originalRecipe;
-            targetColor = copyFrom.targetColor;
-            coloredRecipie = copyFrom.coloredRecipie;
-            active = copyFrom.active;
+        public void CopyFrom(BillAddition copyFrom) {
+            originalRecipe  = copyFrom.originalRecipe;
+            targetColor     = copyFrom.targetColor;
+            coloredRecipie  = copyFrom.coloredRecipie;
+            colorActive     = copyFrom.colorActive;
+            availableStyles = copyFrom.availableStyles;
+            targetStyle     = copyFrom.targetStyle;
         }
 
-        public RecipeDef ColoredRecipie
-        {
-            get
-            {
-                if (coloredRecipie == null)
-                {
+        public RecipeDef ColoredRecipie {
+            get {
+                if (coloredRecipie == null) {
                     coloredRecipie = CreateColoredRecipie(OriginalRecipe);
                     AddToRecipieMap();
                 }
@@ -67,41 +89,34 @@ namespace CraftWithColor
             }
         }
 
-        public RecipeDef Recipie => (active && MySettings.RequireDye) ? ColoredRecipie : OriginalRecipe;
+        public RecipeDef Recipie => (colorActive && MySettings.RequireDye) ? ColoredRecipie : OriginalRecipe;
 
         public RecipeDef OriginalRecipe => originalRecipe;
 
-        public void TriggerRecolor()
-        {
-            if (active && MySettings.SwitchColor)
-            {
+        public void TriggerRecolor() {
+            if (colorActive && MySettings.SwitchColor) {
                 Pawn pawn = bill.billStack?.billGiver?.Map.mapPawns.FreeColonists.Find(p => p.CurJob.bill == bill);
                 pawn?.RetriggerCurrentJob();
             }
         }
 
-        public void UpdateBill()
-        {
+        public void UpdateBill() {
             bill.recipe = Recipie;
         }
 
-        public void ResetBill()
-        {
+        public void ResetBill() {
             bill.recipe = originalRecipe;
         }
 
-        public void AddToRecipieMap()
-        {
+        public void AddToRecipieMap() {
             State.AddToRecipieMap(coloredRecipie, originalRecipe);
         }
 
-        public void RemoveFromRecipieMap()
-        {
+        public void RemoveFromRecipieMap() {
             State.RemoveFromRecipieMap(coloredRecipie);
         }
 
-        private static RecipeDef CreateColoredRecipie(RecipeDef original)
-        {
+        private static RecipeDef CreateColoredRecipie(RecipeDef original) {
             RecipeDef res = CopyRecipeFields(original);
             res.generated = true;
             res.useIngredientsForColor = false;
@@ -109,9 +124,8 @@ namespace CraftWithColor
             return res;
         }
 
-        private static RecipeDef CopyRecipeFields(RecipeDef original) => 
-            new RecipeDef
-            {
+        private static RecipeDef CopyRecipeFields(RecipeDef original) =>
+            new RecipeDef {
                 adjustedCount = original.adjustedCount,
                 allowMixingIngredients = original.allowMixingIngredients,
                 conceptLearned = original.conceptLearned,
@@ -157,8 +171,7 @@ namespace CraftWithColor
                 workTableSpeedStat = original.workTableSpeedStat
             };
 
-        private static List<IngredientCount> AmendIngredients(List<IngredientCount> original)
-        {
+        private static List<IngredientCount> AmendIngredients(List<IngredientCount> original) {
             var dye = new IngredientCount();
             dye.filter = new ThingFilter();
             dye.filter.SetAllow(ThingDefOf.Dye, true);
@@ -167,19 +180,24 @@ namespace CraftWithColor
             return new List<IngredientCount>(original) { dye };
         }
 
-        public void ExposeData()
-        {
-            Scribe_Values.Look(ref active, "active", false);
+        public void ExposeData() {
+            Scribe_Values.Look(ref colorActive, "active", false);
             Scribe_Values.Look(ref targetColor, "color", forceSave: true);
+            Scribe_Values.Look(ref styleActive, "styleActive", false);
+            Scribe_Defs.Look(ref targetStyle, "style");
             Scribe_Defs.Look(ref originalRecipe, "recipie");
         }
 
-        public void SetBillAfterLoad(Bill_Production bill)
-        {
-            if (this.bill == null)
-            {
+        public void SetBillAfterLoad(Bill_Production bill) {
+            if (this.bill == null) {
                 this.bill = bill;
             }
+
+            ThingDef thing = Thing;
+            if (availableStyles == null) {
+                availableStyles = State.StylesFor(thing);
+            }
+            colorable = thing.HasComp(typeof(CompColorable));
         }
     }
 

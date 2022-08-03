@@ -10,7 +10,7 @@ using Verse;
 namespace CraftWithColor
 {
     [HarmonyPatch(typeof(ITab_Bills), "FillTab")]
-    public static class ITabBills_FillTab_Detour
+    public static class ITabBills_FillTab_Patch
     {
         public static bool disable = false;
 

@@ -75,17 +75,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BetterWorkbenchManagement__Detours.cs" />
+    <Compile Include="BetterWorkbenchManagement__Patches.cs" />
     <Compile Include="BillAddition.cs" />
     <Compile Include="BillProduction_Clone_Detour.cs" />
     <Compile Include="BillStack_Delete_Detour.cs" />
-    <Compile Include="ITabBills_FillTab_Detour.cs" />
+    <Compile Include="ITabBills_FillTab_Patch.cs" />
     <Compile Include="ColorMenu.cs" />
-    <Compile Include="DialogBillConfig_DoWindowContents_Detour.cs" />
-    <Compile Include="DialogStylingStation_DoWindowContents_Detour.cs" />
+    <Compile Include="DialogBillConfig_DoWindowContents_Patch.cs" />
+    <Compile Include="DialogStylingStation_DoWindowContents_Patch.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="FloatSubMenu.cs" />
-    <Compile Include="GenRecipe_MakeRecipeProducts_Detour.cs" />
+    <Compile Include="GenRecipe_MakeRecipeProducts_Patch.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="EnumerableWithActionOnNext.cs" />
     <Compile Include="MySettings.cs" />
@@ -95,14 +95,14 @@
     <Compile Include="State.cs" />
     <Compile Include="Strings.cs" />
     <Compile Include="ToilsRecipe_Detours.cs" />
-    <Compile Include="Widgets_ColorSelector_Detour.cs" />
-    <Compile Include="Widgets_DefIcon_Detour.cs" />
+    <Compile Include="Widgets_ColorSelector_Patch.cs" />
+    <Compile Include="Widgets_DefIcon_Patch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ModFiles)\**" CopyToOutputDirectory="PreserveNewest">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
-   <None Include="packages.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -112,13 +112,12 @@
     <CopyBackTo>$(ModFiles)\$(SteamIdFile)</CopyBackTo>
     <CopyBackDir>$(ModFiles)\$(SteamIdFileDir)</CopyBackDir>
   </PropertyGroup>
-  <Target Name="BeforeBuild"
-          Condition="Exists('$(CopyBackFrom)') And !Exists('$(CopyBackTo)')">
+  <Target Name="BeforeBuild" Condition="Exists('$(CopyBackFrom)') And !Exists('$(CopyBackTo)')">
     <Message Text="Copying mod ID file from mod folder back to $(CopyBackTo)" Importance="high" />
     <Copy SourceFiles="$(CopyBackFrom)" DestinationFolder="$(CopyBackDir)" />
   </Target>
   <Target Name="AfterBuild">
-    <Message Text="Moving $(TargetFileName) -> $(AssembliesSubDir)\$(TargetFileName)" Importance="high" />
+    <Message Text="Moving $(TargetFileName) -&gt; $(AssembliesSubDir)\$(TargetFileName)" Importance="high" />
     <MakeDir Directories="$(AssembliesDir)" />
     <Move SourceFiles="$(TargetPath)" DestinationFolder="$(AssembliesDir)" />
   </Target>

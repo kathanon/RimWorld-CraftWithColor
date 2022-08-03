@@ -44,6 +44,8 @@ namespace CraftWithColor
                 jobs.RestoreCapturedJobs(queue);
             }
         }
+
+        public static void SetStyle(this CompStyleable comp, ThingStyleDef style) => comp.styleDef = style;
     }
 }
 
