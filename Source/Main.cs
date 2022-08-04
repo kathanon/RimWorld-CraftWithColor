@@ -1,4 +1,5 @@
-﻿using HugsLib.Utils;
+﻿using HarmonyLib;
+using HugsLib.Utils;
 using RimWorld;
 using Verse;
 
@@ -21,6 +22,7 @@ namespace CraftWithColor
         public override void DefsLoaded()
         {
             MySettings.Setup(Settings);
+            FloatSubMenu.ApplyPatches(HarmonyInst);
         }
     }
 }

@@ -30,10 +30,12 @@ namespace CraftWithColor
             {
                 menu.Add(new FloatSubMenu(Strings.Ideoligion, IdeoSubMenu(target)));
             }
-            Find.WindowStack.Add(new FloatMenu(menu)
-            {
-                vanishIfMouseDistant = false
-            });
+            // TODO: Change back when FloatSubMenu has completed VUIE support
+            FloatSubMenu.NoVUIEMenu(menu);
+            //Find.WindowStack.Add(new FloatMenu(menu)
+            //{
+            //    vanishIfMouseDistant = false
+            //});
         }
 
         private static List<FloatMenuOption> FavoriteSubMenu(ITargetColor target) =>

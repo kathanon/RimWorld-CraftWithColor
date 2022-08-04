@@ -1,10 +1,13 @@
-﻿using RimWorld;
+﻿using HarmonyLib;
+using RimWorld;
 using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using Verse;
+using VUIE;
 
 namespace CraftWithColor
 {
@@ -27,6 +30,25 @@ namespace CraftWithColor
         private const float ArrowExtraWidth = 16f;
         private const float ArrowOffset = 4f;
         private const float ArrowAlpha = 0.6f;
+
+        public static void ApplyPatches(Harmony harmony) {
+            VanillaUIExpanded_Patches.ApplyIfActive(harmony);
+        }
+
+        public static void NoVUIEMenu(List<FloatMenuOption> menu) {
+            VanillaUIExpanded_Patches.AllowAddItem = false;
+            Find.WindowStack.Add(new FloatMenu(menu) {
+                vanishIfMouseDistant = false
+            });
+            VanillaUIExpanded_Patches.AllowAddItem = true;
+        }
+
+        public static void VUIEMenuWithColor(List<FloatMenuOption> menu, BillAddition add) {
+            VanillaUIExpanded_Patches.CurrentAddition = add;
+            Find.WindowStack.Add(new FloatMenu(menu) {
+                vanishIfMouseDistant = false
+            });
+        }
 
         public FloatSubMenu(string label, List<FloatMenuOption> subOptions, string subTitle = null, MenuOptionPriority priority = MenuOptionPriority.Default, Thing revalidateClickTarget = null, float extraPartWidth = 0, Func<Rect, bool> extraPartOnGUI = null, WorldObject revalidateWorldClickTarget = null, bool playSelectionSound = true, int orderInPriority = 0) 
             : base(label, NoAction, priority, null, revalidateClickTarget, extraPartWidth + ArrowExtraWidth, null, revalidateWorldClickTarget, playSelectionSound, orderInPriority)
@@ -164,7 +186,9 @@ namespace CraftWithColor
                 Vector2 offset = localPos - mouse;
                 SoundDef sound = SoundDefOf.FloatMenu_Open;
                 SoundDefOf.FloatMenu_Open = null;
+                VanillaUIExpanded_Patches.AllowAddItem = false;
                 subMenu = new FloatSubMenuInner(this, subOptions, subTitle, offset);
+                VanillaUIExpanded_Patches.AllowAddItem = true;
                 SoundDefOf.FloatMenu_Open = sound;
                 Find.WindowStack.Add(subMenu);
             }
@@ -215,7 +239,58 @@ namespace CraftWithColor
                 {
                     sub.CloseSubMenu();
                 }
-             }
+            }
+        }
+
+        private static class VanillaUIExpanded_Patches {
+            public static BillAddition CurrentAddition = null;
+
+            public static readonly bool Active =
+                ModLister.AllInstalledMods.Any(m => m.PackageIdNonUnique == Strings.VUIE_ID && m.Active);
+
+            public static bool AllowAddItem = true;
+
+            public static void ApplyIfActive(Harmony harmony) {
+                if (Active) {
+                    harmony.Patch(AddSwitchOption_Method, prefix: AddSwitchOption_Prefix);
+                    harmony.Patch(FloatMenuOptions_Method, prefix: FloatMenuOptions_Prefix, postfix: FloatMenuOptions_Postfix);
+                    harmony.Patch(DrawIcon_Method, prefix: DrawIcon_Prefix);
+                    harmony.Patch(WindowClose_Method, postfix: WindowClose_Postfix);
+                }
+            }
+
+            public static MethodBase AddSwitchOption_Method => 
+                AccessTools.Method(typeof(FloatMenuModule), nameof(FloatMenuModule.AddSwitchOption));
+            public static HarmonyMethod AddSwitchOption_Prefix => 
+                new HarmonyMethod(typeof(VanillaUIExpanded_Patches), nameof(AddSwitchOption));
+            public static bool AddSwitchOption() => AllowAddItem;
+
+            public static MethodBase FloatMenuOptions_Method => 
+                AccessTools.Method(typeof(Dialog_FloatMenuOptions), nameof(Dialog_FloatMenuOptions.DoWindowContents));
+            public static HarmonyMethod FloatMenuOptions_Prefix => 
+                new HarmonyMethod(typeof(VanillaUIExpanded_Patches), nameof(FloatMenuOptions_Pre));
+            public static HarmonyMethod FloatMenuOptions_Postfix => 
+                new HarmonyMethod(typeof(VanillaUIExpanded_Patches), nameof(FloatMenuOptions_Post));
+            public static void FloatMenuOptions_Pre() { }
+            public static void FloatMenuOptions_Post() { }
+
+            public static MethodBase DrawIcon_Method =>
+                AccessTools.Method(
+                    typeof(Dialog_FloatMenuGrid.Command_FloatMenuOption), 
+                    nameof(Dialog_FloatMenuGrid.Command_FloatMenuOption.DrawIcon));
+            public static HarmonyMethod DrawIcon_Prefix =>
+                new HarmonyMethod(typeof(VanillaUIExpanded_Patches), nameof(DrawIcon));
+            public static void DrawIcon() => Widgets_Icon_Patch.Next(CurrentAddition?.ActiveColor);
+
+            public static MethodBase WindowClose_Method =>
+                AccessTools.Method(typeof(Window), nameof(Window.PostClose));
+            public static HarmonyMethod WindowClose_Postfix =>
+                new HarmonyMethod(typeof(VanillaUIExpanded_Patches), nameof(WindowClose));
+            public static void WindowClose(Window __instance) {
+                if (__instance is Dialog_FloatMenuGrid) {
+                    CurrentAddition = null;
+                }
+            }
         }
     }
 }

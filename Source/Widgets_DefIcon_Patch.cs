@@ -4,13 +4,16 @@ using Verse;
 
 namespace CraftWithColor
 {
-    [HarmonyPatch(typeof(Widgets), nameof(Widgets.DefIcon))]
-    public static class Widgets_DefIcon_Patch
+    [HarmonyPatch(typeof(Widgets))]
+    public static class Widgets_Icon_Patch
     {
         private static Color? nextColor = null;
         private static ThingStyleDef nextStyle = null;
 
-        public static void Prefix(Def def, ref Color? color, ref ThingStyleDef thingStyleDef)
+        [HarmonyPatch(nameof(Widgets.ThingIcon), 
+            typeof(Rect), typeof(ThingDef), typeof(ThingDef), typeof(ThingStyleDef), typeof(float), typeof(Color?))]
+        [HarmonyPrefix]
+        public static void ThingIcon(ref Color? color)
         {
             if (nextColor != null)
             {
@@ -28,10 +31,14 @@ namespace CraftWithColor
             }
         }
 
-        public static void Next(Color? color, ThingStyleDef style)
-        {
+        public static void Next(Color? color = null, ThingStyleDef style = null) {
             nextColor = color;
             nextStyle = style;
+        }
+
+        public static void Next(BillAddition add) {
+            nextColor = add.ActiveColor;
+            nextStyle = add.ActiveStyle;
         }
     }
 }

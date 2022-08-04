@@ -9,7 +9,9 @@ namespace CraftWithColor
         public const string MOD_IDENTIFIER = "kathanon.CraftWithColor";
         public const string PREFIX = MOD_IDENTIFIER + ".";
 
-        public const string BWM_ID = "falconne.bwm";
+        public const string BWM_ID  = "falconne.bwm";
+        public const string VUIE_ID = "vanillaexpanded.ui";
+
         public static readonly Dictionary<string, Range> MODS_CONFLICTING_WITH_CHECKBOX_POS = new Dictionary<string, Range>
         {
             // Range is distance from bottom margin of dialog

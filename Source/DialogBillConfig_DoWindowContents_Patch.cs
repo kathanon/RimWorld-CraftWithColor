@@ -29,7 +29,7 @@ namespace CraftWithColor {
                 BillAddition add = State.GetAddition(___bill);
                 DrawWidgets(inRect, add);
                 add.UpdateBill();
-                Widgets_DefIcon_Patch.Next(add.ActiveColor, add.ActiveStyle);
+                Widgets_Icon_Patch.Next(add);
             }
             return true;
         }
@@ -105,18 +105,11 @@ namespace CraftWithColor {
             }
         }
 
-        private static bool menuOpen = false;
-
         private static void StyleMenu(BillAddition add) {
-            if (!menuOpen) {
-                menuOpen = true;
-                var menu = add.Styles.Select(s => MenuOption(add, s)).ToList();
-                Find.WindowStack.Add(new FloatMenu(menu) {
-                    vanishIfMouseDistant = false,
-                    onCloseCallback = () => menuOpen = false,
-                });
-            }
-        }
+            var menu = add.Styles.Select(s => MenuOption(add, s)).ToList();
+            // TODO: Refactor this more nicely.
+            FloatSubMenu.VUIEMenuWithColor(menu, add);
+         }
 
         private static FloatMenuOption MenuOption(BillAddition add, ThingStyleDef style) =>
             new FloatMenuOption(style.Category.LabelCap, () => add.TargetStyle = style, add.Thing) {

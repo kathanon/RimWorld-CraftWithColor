@@ -6,7 +6,7 @@ using UnityEngine;
 using Verse;
 
 namespace CraftWithColor {
-    internal class BillAddition : IExposable, ITargetColor {
+    public class BillAddition : IExposable, ITargetColor {
         private RecipeDef coloredRecipie;
         private RecipeDef originalRecipe;
         private Color targetColor;
