@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Verse;
 
 namespace CraftWithColor
 {
@@ -34,7 +35,7 @@ namespace CraftWithColor
 
         public bool Intersects(Range r) => (start <= r.end && end >= r.end) || (start <= r.start && end >= r.start);
 
-        public override string ToString() => $"({start}, {end})";
+        public override string ToString() => $"[{start}, {end}]";
 
         public static bool operator <(Range a, Range b) => a.end < b.start;
         public static bool operator >(Range a, Range b) => a.start > b.end;

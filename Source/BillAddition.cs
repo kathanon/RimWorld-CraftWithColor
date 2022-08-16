@@ -7,11 +7,48 @@ using Verse;
 
 namespace CraftWithColor {
     public class BillAddition : IExposable, ITargetColor {
+        public enum RandomType { None, Any, Ideo, Favorite, Saved, Standard }
+
+        private static readonly Func<BillAddition,Color?>[] randomFuncs = new Func<BillAddition,Color?>[] {
+            b => b?.targetColor ?? State.DefaultColor,
+
+            b => UnityEngine.Random.ColorHSV(),
+
+            b => Find.IdeoManager.IdeosInViewOrder
+            .Select<Ideo,Color?>(p => p.ApparelColor)
+            .RandomElementWithFallback(null),
+
+            b => Find.CurrentMap.mapPawns.FreeColonists
+            .Select(p => p.story.favoriteColor)
+            .Where(c => c != null)
+            .RandomElementWithFallback(null),
+
+            b => State.SavedColors
+            .Select<Color,Color?>(c => c)
+            .RandomElementWithFallback(null),
+
+            b => DefDatabase<ColorDef>.AllDefs
+            .Where(d => !d.hairOnly)
+            .Select<ColorDef,Color?>(d => d.color)
+            .RandomElementWithFallback(null),
+        };
+
+        private static readonly string[] randomTip = new string[] {
+            null,
+            Strings.RandomAny,
+            Strings.RandomIdeo,
+            Strings.RandomFavo,
+            Strings.RandomSaved,
+            Strings.RandomStd,
+        };
+
         private RecipeDef coloredRecipie;
         private RecipeDef originalRecipe;
-        private Color targetColor;
         private Bill_Production bill;
+        private Color targetColor;
+        private RandomType random = RandomType.None;
         private ThingStyleDef targetStyle;
+
         private IEnumerable<ThingStyleDef> availableStyles;
         private bool colorable;
 
@@ -21,14 +58,38 @@ namespace CraftWithColor {
         public Color TargetColor {
             get => targetColor;
             set {
-                if (!value.IndistinguishableFrom(targetColor)) {
+                if (random != RandomType.None || !value.IndistinguishableFrom(targetColor)) {
                     targetColor = value;
                     TriggerRecolor();
                 }
+                random = RandomType.None;
             }
         }
 
-        public Color? ActiveColor => colorActive ? (Color?) targetColor : null;
+        public RandomType RandomColorType {
+            get => random;
+            set { 
+                random = value;
+                TriggerRandom();
+            }
+        }
+
+        public string RandomColorTip => randomTip[(int) random];
+
+        public bool HasRandomColor => random != RandomType.None;
+
+        public static readonly RandomColorAccessor RandomColor = new RandomColorAccessor();
+
+        public class RandomColorAccessor {
+            public Color? this[RandomType t]     => For(t, null);
+
+            public Color? this[BillAddition add] => For(add.random, add);
+
+            private Color? For(RandomType t, BillAddition add) => 
+                randomFuncs[(int) t].Invoke(add);
+        }
+
+        public Color? ActiveColor => colorActive ? (Color?) TargetColor : null;
 
         public IEnumerable<ThingStyleDef> Styles => availableStyles;
 
@@ -77,6 +138,7 @@ namespace CraftWithColor {
             colorActive     = copyFrom.colorActive;
             availableStyles = copyFrom.availableStyles;
             targetStyle     = copyFrom.targetStyle;
+            random          = copyFrom.random;
         }
 
         public RecipeDef ColoredRecipie {
@@ -93,8 +155,11 @@ namespace CraftWithColor {
 
         public RecipeDef OriginalRecipe => originalRecipe;
 
+        public void TriggerRandom() => 
+            targetColor = RandomColor[this] ?? RandomColor[RandomType.Any] ?? Color.white;
+
         public void TriggerRecolor() {
-            if (colorActive && MySettings.SwitchColor) {
+            if (colorActive && MySettings.SwitchColor && random == RandomType.None) {
                 Pawn pawn = bill.billStack?.billGiver?.Map.mapPawns.FreeColonists.Find(p => p.CurJob.bill == bill);
                 pawn?.RetriggerCurrentJob();
             }
@@ -184,6 +249,7 @@ namespace CraftWithColor {
             Scribe_Values.Look(ref colorActive, "active", false);
             Scribe_Values.Look(ref targetColor, "color", forceSave: true);
             Scribe_Values.Look(ref styleActive, "styleActive", false);
+            Scribe_Values.Look(ref random, "random", RandomType.None);
             Scribe_Defs.Look(ref targetStyle, "style");
             Scribe_Defs.Look(ref originalRecipe, "recipie");
         }

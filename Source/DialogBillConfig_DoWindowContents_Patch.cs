@@ -17,12 +17,15 @@ namespace CraftWithColor {
         private const float WidgetsHeight = IconSize + Gap + LabelHeight;
         private const float CheckAdjust   = (IconSize - LabelHeight) / 2;
 
+        private const float OpenAnimationMinHeight = 100f;
+
         private static float colorPos;
         private static float colorCheckPos;
         private static float stylePos;
         private static float styleCheckPos;
         private static bool posInitialized = false;
         private static bool disabled = false;
+        private static float prevEventHeight = float.MaxValue;
 
         public static bool Prefix(Rect inRect, Bill_Production ___bill) {
             if (ShouldApply(___bill)) {
@@ -36,6 +39,13 @@ namespace CraftWithColor {
 
         public static void SetupPosition(float height) {
             if (!posInitialized) {
+                bool openAnimation = height < 0f || height > prevEventHeight;
+                prevEventHeight = height;
+                if (openAnimation && height < OpenAnimationMinHeight) {
+                    disabled = true;
+                    return;
+                }
+
                 try {
                     float fromBottom = Window.CloseButSize.y + Offset;
                     Range preferred = new Range(fromBottom, WidgetsHeight);
@@ -48,11 +58,14 @@ namespace CraftWithColor {
                     colorPos = top + LabelHeight + Gap;
                     styleCheckPos = stylePos + CheckAdjust;
                     colorCheckPos = colorPos + CheckAdjust;
+                    disabled = false;
                 } catch (RangeLimitException) {
-                    Main.Instance.Logger.Error(Strings.NoSpaceError + MySettings.ConflictingMods);
+                    if (!openAnimation) {
+                        Main.Instance.Logger.Error(Strings.NoSpaceError + MySettings.ConflictingMods);
+                    }
                     disabled = true;
                 }
-                posInitialized = true;
+                posInitialized = !openAnimation;
             }
         }
 
@@ -77,6 +90,10 @@ namespace CraftWithColor {
                             }
                         }
                         Widgets.DrawBoxSolid(colorRect, add.TargetColor);
+                        if (add.HasRandomColor) {
+                            Widgets.DrawTextureFitted(colorRect, Textures.Random, 1f);
+                            TooltipHandler.TipRegion(colorRect, add.RandomColorTip);
+                        }
                         GUI.color = dim;
                         Widgets.DrawBox(colorRect);
                         GUI.color = old;

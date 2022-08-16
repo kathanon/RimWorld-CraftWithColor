@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using RandomType = CraftWithColor.BillAddition.RandomType;
 
 namespace CraftWithColor {
     using AdditionDict = Dictionary<Bill, BillAddition>;
@@ -46,7 +47,7 @@ namespace CraftWithColor {
                 if (!defaultColor.HasValue) {
                     defaultColor =
                           Find.IdeoManager.classicMode
-                        ? DefDatabase<ColorDef>.GetRandom().color
+                        ? BillAddition.RandomColor[RandomType.Standard] ?? Color.white
                         : Find.FactionManager.OfPlayer.ideos.PrimaryIdeo.ApparelColor;
                 }
                 return defaultColor.Value;
@@ -104,24 +105,27 @@ namespace CraftWithColor {
 
         private static readonly List<ThingDefCountClass> ColorForLast_EMPTY = new List<ThingDefCountClass>();
 
-        public static Color? ColorForLast(ThingDef def) => ForLast(def, ColorFor, LastFinishedBillColor);
+        public static Color? ColorForLast(ThingDef def) => ForLast(def, ColorFor, LastFinishedBillColor, true);
 
         public static ThingStyleDef StyleForLast(ThingDef def) => ForLast(def, StyleFor);
 
-        private static T ForLast<T>(ThingDef def, Func<Bill_Production,T> fromBill, T value = default(T)) {
+        private static T ForLast<T>(ThingDef def, Func<Bill_Production,T> fromBill, T value = default, bool color = false) {
             if (def != null) {
                 foreach (var product in LastFinishedBill?.recipe?.products ?? ColorForLast_EMPTY) {
                     if (product.thingDef == def) {
+                        if (color && value == null) {
+                            TryGetAddition(LastFinishedBill)?.TriggerRandom();
+                        }
                         return (value != null) ? value : fromBill(LastFinishedBill);
                     }
                 }
             }
-            return default(T);
+            return default;
         }
 
-        public static Color? ColorFor(Bill bill) => dict.TryGetValue(bill, out BillAddition add) ? add.ActiveColor : null;
+        public static Color? ColorFor(Bill bill) => TryGetAddition(bill)?.ActiveColor;
 
-        public static ThingStyleDef StyleFor(Bill bill) => dict.TryGetValue(bill, out BillAddition add) ? add.ActiveStyle : null;
+        public static ThingStyleDef StyleFor(Bill bill) => TryGetAddition(bill)?.ActiveStyle;
 
         public static void RemoveBill(Bill bill) {
             if (bill != null) {

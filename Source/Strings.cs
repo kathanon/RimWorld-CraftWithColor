@@ -23,8 +23,14 @@ namespace CraftWithColor
         public static readonly string SavedColors  = (PREFIX + "SavedColors" ).Translate();
         public static readonly string Favorite     = (PREFIX + "Favorite"    ).Translate();
         public static readonly string Ideoligion   = (PREFIX + "Ideoligion"  ).Translate();
+        public static readonly string Random       = (PREFIX + "Random"      ).Translate();
         public static readonly string DyeItem      = (PREFIX + "DyeItem"     ).Translate();
         public static readonly string StyleItem    = (PREFIX + "StyleItem"   ).Translate();
+        public static readonly string RandomAny    = (PREFIX + "RandomAny"   ).Translate();
+        public static readonly string RandomIdeo   = (PREFIX + "RandomIdeo"  ).Translate();
+        public static readonly string RandomFavo   = (PREFIX + "RandomFavo"  ).Translate();
+        public static readonly string RandomSaved  = (PREFIX + "RandomSaved" ).Translate();
+        public static readonly string RandomStd    = (PREFIX + "RandomStd"   ).Translate();
         public static readonly string SelectColor  = (PREFIX + "SelectColor" ).Translate();
         public static readonly string R            = (PREFIX + "R"           ).Translate();
         public static readonly string G            = (PREFIX + "G"           ).Translate();

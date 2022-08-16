@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
+using static CraftWithColor.BillAddition;
 
 namespace CraftWithColor
 {
@@ -9,25 +10,23 @@ namespace CraftWithColor
     {
         Color TargetColor { get; set; }
 
+        RandomType RandomColorType { set; }
+
         bool Update { get; }
     }
 
-    internal class ColorMenu
-    {
-        public static void Open(ITargetColor target)
-        {
+    internal class ColorMenu {
+        public static void Open(ITargetColor target) {
             List<FloatMenuOption> menu = new List<FloatMenuOption>();
-            if (target is BillAddition)
-            {
+            if (target is BillAddition) {
                 menu.Add(new FloatMenuOption(Strings.Select, () => SelectColorDialog.Open(target as BillAddition)));
-                if (State.SavedColors.Count > 0 && !MySettings.OnlyStandard)
-                {
-                    menu.Add(new FloatSubMenu(Strings.SavedColors, SubMenuItems(State.SavedColors, c => c, c => " ", target)));
-                }
+            }
+            menu.Add(RandomOption(target, RandomType.Any));
+            if (target is BillAddition && State.SavedColors.Count > 0 && !MySettings.OnlyStandard) {
+                menu.Add(new FloatSubMenu(Strings.SavedColors, SavedSubMenu(target)));
             }
             menu.Add(new FloatSubMenu(Strings.Favorite, FavoriteSubMenu(target)));
-            if (!Find.IdeoManager.classicMode)
-            {
+            if (!Find.IdeoManager.classicMode) {
                 menu.Add(new FloatSubMenu(Strings.Ideoligion, IdeoSubMenu(target)));
             }
             // TODO: Change back when FloatSubMenu has completed VUIE support
@@ -38,15 +37,21 @@ namespace CraftWithColor
             //});
         }
 
-        private static List<FloatMenuOption> FavoriteSubMenu(ITargetColor target) =>
-            SubMenuItems(Find.CurrentMap.mapPawns.FreeColonists, p => p.story.favoriteColor, target);
-        private static List<FloatMenuOption> IdeoSubMenu(ITargetColor target) =>
-            SubMenuItems(Find.IdeoManager.IdeosInViewOrder, i => i.ApparelColor, target);
+        private static FloatMenuOption RandomOption(ITargetColor target, RandomType type) =>
+            new FloatMenuOption(Strings.Random, () => target.RandomColorType = type);
 
-        private static List<FloatMenuOption> SubMenuItems<T>(IEnumerable<T> items, Func<T, Color?> getColor, ITargetColor target) =>
-            SubMenuItems(items, getColor, o => o.ToString(), target);
-        private static List<FloatMenuOption> SubMenuItems<T>(IEnumerable<T> items, Func<T, Color?> getColor, Func<T, string> toString, ITargetColor target)
+        private static List<FloatMenuOption> SavedSubMenu(ITargetColor target) =>
+            SubMenuItems(target, State.SavedColors, RandomType.Saved, c => c, c => " ");
+        private static List<FloatMenuOption> FavoriteSubMenu(ITargetColor target) =>
+            SubMenuItems(target, Find.CurrentMap.mapPawns.FreeColonists, RandomType.Favorite, p => p.story.favoriteColor);
+        private static List<FloatMenuOption> IdeoSubMenu(ITargetColor target) =>
+            SubMenuItems(target, Find.IdeoManager.IdeosInViewOrder, RandomType.Ideo, i => i.ApparelColor);
+
+        private static List<FloatMenuOption> SubMenuItems<T>(
+            ITargetColor target, IEnumerable<T> items, RandomType random, 
+            Func<T, Color?> getColor, Func<T, string> toString = null)
         {
+            if (toString is null) toString = o => o.ToString();
             List<FloatMenuOption> menu = new List<FloatMenuOption>();
             foreach (T item in items)
             {
@@ -55,11 +60,12 @@ namespace CraftWithColor
                 {
                     menu.Add(new FloatMenuOption(
                         toString(item),
-                        delegate { target.TargetColor = color.Value; },
+                        () => target.TargetColor = color.Value,
                         BaseContent.WhiteTex,
                         color.Value));
                 }
             }
+            menu.Add(RandomOption(target, random));
             return menu;
         }
     }

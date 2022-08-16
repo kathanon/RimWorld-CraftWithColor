@@ -93,6 +93,7 @@ namespace CraftWithColor
             }
 
             public bool Update { get => true; }
+            public BillAddition.RandomType RandomColorType { set => throw new System.NotImplementedException(); }
 
             public void Writeback(ref Color color)
             {

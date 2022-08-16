@@ -89,7 +89,8 @@
     <Compile Include="SelectColorDialog.cs" />
     <Compile Include="State.cs" />
     <Compile Include="Strings.cs" />
-    <Compile Include="ToilsRecipe_Detours.cs" />
+    <Compile Include="Textures.cs" />
+    <Compile Include="ToilsRecipe_Patches.cs" />
     <Compile Include="Widgets_ColorSelector_Patch.cs" />
     <Compile Include="Widgets_DefIcon_Patch.cs" />
   </ItemGroup>

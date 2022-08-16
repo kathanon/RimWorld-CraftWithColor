@@ -4,9 +4,16 @@
 	<kathanon.CraftWithColor.SavedColors>Saved colors</kathanon.CraftWithColor.SavedColors>
 	<kathanon.CraftWithColor.Favorite>Favorite</kathanon.CraftWithColor.Favorite>
 	<kathanon.CraftWithColor.Ideoligion>Ideoligion</kathanon.CraftWithColor.Ideoligion>
-	
-	<kathanon.CraftWithColor.DyeItem>Dye item</kathanon.CraftWithColor.DyeItem>
+	<kathanon.CraftWithColor.Random>Random</kathanon.CraftWithColor.Random>
+
+    <kathanon.CraftWithColor.DyeItem>Dye item</kathanon.CraftWithColor.DyeItem>
 	<kathanon.CraftWithColor.StyleItem>Style item</kathanon.CraftWithColor.StyleItem>
+	
+	<kathanon.CraftWithColor.RandomAny>Random color</kathanon.CraftWithColor.RandomAny>
+	<kathanon.CraftWithColor.RandomIdeo>Color of random ideoligion</kathanon.CraftWithColor.RandomIdeo>
+	<kathanon.CraftWithColor.RandomFavo>Favorite color of random colonist</kathanon.CraftWithColor.RandomFavo>
+	<kathanon.CraftWithColor.RandomSaved>Random saved color</kathanon.CraftWithColor.RandomSaved>
+	<kathanon.CraftWithColor.RandomStd>Random standard color</kathanon.CraftWithColor.RandomStd>
 	
 	<kathanon.CraftWithColor.SelectColor>Select color</kathanon.CraftWithColor.SelectColor>
 	<kathanon.CraftWithColor.R>R</kathanon.CraftWithColor.R>

@@ -41,6 +41,10 @@ namespace CraftWithColor
             }
         }
 
+        public BillAddition.RandomType RandomColorType {
+            set => TargetColor = BillAddition.RandomColor[value] ?? color;
+        }
+
         public bool Update { get => false; }
 
         public void Cancel()

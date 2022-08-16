@@ -8,8 +8,7 @@ using Verse.AI;
 namespace CraftWithColor 
 {
     [HarmonyPatch(typeof(Toils_Recipe), nameof(Toils_Recipe.MakeUnfinishedThingIfNeeded))]
-    public static class ToilsRecipe_MakeUnfinishedThingIfNeeded_Detour
-    {
+    public static class ToilsRecipe_MakeUnfinishedThingIfNeeded_Patch {
         public static Toil Postfix(Toil __result)
         {
             Toil toil = __result;
@@ -19,7 +18,8 @@ namespace CraftWithColor
                 toil.initAction = delegate
                 {
                     Job job = toil.actor.jobs.curJob;
-                    Color? color = State.ColorFor(job.bill);
+                    var add = State.TryGetAddition(job.bill);
+                    Color? color = add?.ActiveColor;
                     bool createUnfinished = job.GetTarget(TargetIndex.B).Thing as UnfinishedThing == null;
                     bool updateColor = !createUnfinished && NeedsUpdate(job, color);
                     bool setColor = (createUnfinished && color != null) || updateColor;
@@ -30,7 +30,11 @@ namespace CraftWithColor
                     original();
                     if (setColor)
                     {
-                        ToilsUtil.GetColorable(job)?.SetColor(color.Value);
+                        CompColorable comp = ToilsUtil.GetColorable(job);
+                        if (comp != null) {
+                            comp.SetColor(color.Value);
+                            if (createUnfinished) add?.TriggerRandom();
+                        }
                     }
                 };
             }
@@ -47,8 +51,7 @@ namespace CraftWithColor
     }
 
     [HarmonyPatch(typeof(Toils_Recipe), nameof(Toils_Recipe.FinishRecipeAndStartStoringProduct))]
-    public static class ToilsRecipe_FinishRecipeAndStartStoringProduct_Detour
-    {
+    public static class ToilsRecipe_FinishRecipeAndStartStoringProduct_Patch {
         public static Toil Postfix(Toil __result)
         {
             Toil toil = __result;
