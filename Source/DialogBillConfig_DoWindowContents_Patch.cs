@@ -83,11 +83,7 @@ namespace CraftWithColor {
                     Widgets.CheckboxLabeled(checkRect, Strings.DyeItem, ref add.colorActive, placeCheckboxNearText: false);
                     if (add.colorActive) {
                         if (Widgets.ButtonInvisible(colorRect)) {
-                            if (MySettings.WithIdeology) {
-                                ColorMenu.Open(add);
-                            } else {
-                                SelectColorDialog.Open(add);
-                            }
+                            ColorMenu.Open(add);
                         }
                         Widgets.DrawBoxSolid(colorRect, add.TargetColor);
                         if (add.HasRandomColor) {

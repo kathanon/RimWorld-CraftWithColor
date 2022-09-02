@@ -25,9 +25,11 @@ namespace CraftWithColor
             if (target is BillAddition && State.SavedColors.Count > 0 && !MySettings.OnlyStandard) {
                 menu.Add(new FloatSubMenu(Strings.SavedColors, SavedSubMenu(target)));
             }
-            menu.Add(new FloatSubMenu(Strings.Favorite, FavoriteSubMenu(target)));
-            if (!Find.IdeoManager.classicMode) {
-                menu.Add(new FloatSubMenu(Strings.Ideoligion, IdeoSubMenu(target)));
+            if (MySettings.WithIdeology) {
+                menu.Add(new FloatSubMenu(Strings.Favorite, FavoriteSubMenu(target)));
+                if (!Find.IdeoManager.classicMode) {
+                    menu.Add(new FloatSubMenu(Strings.Ideoligion, IdeoSubMenu(target)));
+                }
             }
             // TODO: Change back when FloatSubMenu has completed VUIE support
             FloatSubMenu.NoVUIEMenu(menu);

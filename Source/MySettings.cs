@@ -37,7 +37,8 @@ namespace CraftWithColor
             get => WithIdeology && requireDye && changeMode == ColorChangeMode.RequireDye;
         }
 
-        public static readonly bool WithIdeology = ModLister.IdeologyInstalled;
+        public static readonly bool WithIdeology = 
+            ModLister.GetActiveModWithIdentifier("Ludeon.RimWorld.Ideology") != null;
 
         public static MultiRange ConflictingCheckboxRange { get; private set; } = new MultiRange();
         public static List<string> ConflictingMods { get; private set; } = new List<string>();

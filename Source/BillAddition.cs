@@ -132,13 +132,11 @@ namespace CraftWithColor {
         }
 
         public void CopyFrom(BillAddition copyFrom) {
-            originalRecipe  = copyFrom.originalRecipe;
             targetColor     = copyFrom.targetColor;
-            coloredRecipie  = copyFrom.coloredRecipie;
             colorActive     = copyFrom.colorActive;
-            availableStyles = copyFrom.availableStyles;
             targetStyle     = copyFrom.targetStyle;
             random          = copyFrom.random;
+            availableStyles = State.StylesFor(copyFrom.originalRecipe.ProducedThingDef);
         }
 
         public RecipeDef ColoredRecipie {

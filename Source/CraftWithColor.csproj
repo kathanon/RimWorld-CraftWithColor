@@ -72,8 +72,8 @@
   <ItemGroup>
     <Compile Include="BetterWorkbenchManagement__Patches.cs" />
     <Compile Include="BillAddition.cs" />
-    <Compile Include="BillProduction_Clone_Detour.cs" />
-    <Compile Include="BillStack_Delete_Detour.cs" />
+    <Compile Include="BillProduction_Clone_Patch.cs" />
+    <Compile Include="BillStack_Delete_Patch.cs" />
     <Compile Include="ITabBills_FillTab_Patch.cs" />
     <Compile Include="ColorMenu.cs" />
     <Compile Include="DialogBillConfig_DoWindowContents_Patch.cs" />

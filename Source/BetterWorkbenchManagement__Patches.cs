@@ -17,6 +17,7 @@ namespace CraftWithColor {
         }
 
         public static void Postfix(Bill_Production sourceBill, Bill_Production destinationBill) {
+            Log.Message("ExtendedBillDataStorage.MirrorBills");
             State.BWM_MirrorBills(sourceBill, destinationBill);
         }
     }
