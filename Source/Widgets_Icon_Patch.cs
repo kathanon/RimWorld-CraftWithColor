@@ -11,7 +11,11 @@ namespace CraftWithColor
         private static ThingStyleDef nextStyle = null;
 
         [HarmonyPatch(nameof(Widgets.ThingIcon), 
-            typeof(Rect), typeof(ThingDef), typeof(ThingDef), typeof(ThingStyleDef), typeof(float), typeof(Color?))]
+            typeof(Rect), typeof(ThingDef), typeof(ThingDef), typeof(ThingStyleDef), typeof(float), typeof(Color?)
+#if !VERSION_1_3
+            , typeof(int?)
+#endif
+            )]
         [HarmonyPrefix]
         public static void ThingIcon(ref Color? color)
         {
@@ -22,7 +26,12 @@ namespace CraftWithColor
             }
         }
 
-        [HarmonyPatch(nameof(Widgets.GetIconFor))]
+        [HarmonyPatch(nameof(Widgets.GetIconFor),
+            typeof(ThingDef), typeof(ThingDef), typeof(ThingStyleDef)
+#if !VERSION_1_3
+            , typeof(int?)
+#endif
+            )]
         [HarmonyPrefix]
         public static void GetIconFor(ref ThingStyleDef thingStyleDef) {
             if (nextStyle != null) {

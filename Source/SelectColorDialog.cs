@@ -114,7 +114,11 @@ namespace CraftWithColor
                 {
                     defaultColorsCache = (
                         from x in DefDatabase<ColorDef>.AllDefsListForReading
+#if VERSION_1_3
                         where !x.hairOnly
+#else
+                        where x.colorType != ColorType.Hair
+#endif
                         select x.color
                         ).ToList();
                 }
@@ -263,7 +267,11 @@ namespace CraftWithColor
 
             Widgets.Label(innerRect.TopPartPixels(ColorListLabelHeight), label);
             Widgets_ColorSelector_Patch.Skip();
+#if VERSION_1_3
             Widgets.ColorSelector(innerRect.BottomPartPixels(colorsHeight), ref color, list);
+#else
+            Widgets.ColorSelector(innerRect.BottomPartPixels(colorsHeight), ref color, list, out float _);
+#endif
 
             rect.y += rect.height + Gap;
         }

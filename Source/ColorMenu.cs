@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FloatSubMenus;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
@@ -31,12 +32,7 @@ namespace CraftWithColor
                     menu.Add(new FloatSubMenu(Strings.Ideoligion, IdeoSubMenu(target)));
                 }
             }
-            // TODO: Change back when FloatSubMenu has completed VUIE support
-            FloatSubMenu.NoVUIEMenu(menu);
-            //Find.WindowStack.Add(new FloatMenu(menu)
-            //{
-            //    vanishIfMouseDistant = false
-            //});
+            Find.WindowStack.Add(new FloatMenu(menu));
         }
 
         private static FloatMenuOption RandomOption(ITargetColor target, RandomType type) =>

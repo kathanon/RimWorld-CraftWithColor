@@ -22,7 +22,6 @@ namespace CraftWithColor
         public override void DefsLoaded()
         {
             MySettings.Setup(Settings);
-            FloatSubMenu.ApplyPatches(HarmonyInst);
         }
     }
 }

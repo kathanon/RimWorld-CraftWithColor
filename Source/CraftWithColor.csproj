@@ -3,6 +3,8 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <ModName>CraftWithColor</ModName>
+    <ModId>kathanon.CraftWithColor</ModId>
+    <MultiVersion>true</MultiVersion>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
@@ -10,12 +12,12 @@
     <ProjectGuid>{18BD585B-B1D1-40CD-918A-13A5F2027F35}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>$(ModName)</RootNamespace>
-    <AssemblyName>$(ModName)</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
+  <!-- Import base build file -->
+  <Import Project="RimWorld.targets" />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
@@ -23,39 +25,14 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup>
-    <Steam Condition="'$(Steam)' == ''">C:\Program Files\Steam</Steam>
-    <RimWorld>$(Steam)\steamapps\common\RimWorld</RimWorld>
-    <ModsDir>$(RimWorld)\Mods</ModsDir>
-    <OutputPath>$(ModsDir)\$(ModName)</OutputPath>
-    <AssembliesSubDir>Assemblies</AssembliesSubDir>
-    <AssembliesDir>$(OutputPath)\$(AssembliesSubDir)</AssembliesDir>
-    <ModFiles>..\ModFiles</ModFiles>
-    <StartAction>Program</StartAction>
-    <StartProgram>$(RimWorld)\RimWorldWin64.exe</StartProgram>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.2.1.0, Culture=neutral, processorArchitecture=MSIL" Private="False">
-      <HintPath>..\packages\Lib.Harmony.2.2.1\lib\net472\0Harmony.dll</HintPath>
+    <!-- RimWorld DLLs -->
+    <Reference Include="0Harmony, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL" Private="False">
+      <HintPath>..\packages\Lib.Harmony.2.2.2\lib\net472\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp" Private="False">
       <HintPath>$(RimWorld)\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="HugsLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" Private="False">
-      <HintPath>..\packages\UnlimitedHugs.Rimworld.HugsLib.9.0.1\lib\net472\HugsLib.dll</HintPath>
-    </Reference>
-    <Reference Include="ImprovedWorkbenches" Private="False">
-      <HintPath>$(Steam)\steamapps\workshop\content\294100\935982361\Assemblies\ImprovedWorkbenches.dll</HintPath>
-    </Reference>
-    <Reference Include="VUIE" Private="False">
-      <HintPath>$(Steam)\steamapps\workshop\content\294100\2749945924\1.3\Assemblies\VUIE.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
     <Reference Include="UnityEngine" Private="False">
       <HintPath>$(RimWorld)\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
@@ -68,7 +45,24 @@
     <Reference Include="UnityEngine.UI" Private="False">
       <HintPath>$(RimWorld)\RimWorldWin64_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="HugsLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" Private="False">
+      <HintPath>..\packages\UnlimitedHugs.Rimworld.HugsLib.9.0.1\lib\net472\HugsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="FloatSubMenu" Private="False">
+      <HintPath>$(Workshop)\2864015430\$(RimWorldVersion)\Assemblies\FloatSubMenu.dll</HintPath>
+    </Reference>
+    <Reference Include="ImprovedWorkbenches" Private="False">
+      <HintPath>$(Workshop)\935982361\Assemblies\ImprovedWorkbenches.dll</HintPath>
+    </Reference>
+    <!-- Other Dlls -->
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
+  <!-- Project files -->
   <ItemGroup>
     <Compile Include="BetterWorkbenchManagement__Patches.cs" />
     <Compile Include="BillAddition.cs" />
@@ -79,7 +73,6 @@
     <Compile Include="DialogBillConfig_DoWindowContents_Patch.cs" />
     <Compile Include="DialogStylingStation_DoWindowContents_Patch.cs" />
     <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="FloatSubMenu.cs" />
     <Compile Include="GenRecipe_MakeRecipeProducts_Patch.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="EnumerableWithActionOnNext.cs" />
@@ -92,29 +85,13 @@
     <Compile Include="Textures.cs" />
     <Compile Include="ToilsRecipe_Patches.cs" />
     <Compile Include="Widgets_ColorSelector_Patch.cs" />
-    <Compile Include="Widgets_DefIcon_Patch.cs" />
+    <Compile Include="Widgets_Icon_Patch.cs" />
   </ItemGroup>
+  <!-- Show ModFiles in solution explorer -->
   <ItemGroup>
     <None Include="$(ModFiles)\**" CopyToOutputDirectory="PreserveNewest">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <SteamIdFile>About\PublishedFileId.txt</SteamIdFile>
-    <SteamIdFileDir>About</SteamIdFileDir>
-    <CopyBackFrom>$(OutputPath)\$(SteamIdFile)</CopyBackFrom>
-    <CopyBackTo>$(ModFiles)\$(SteamIdFile)</CopyBackTo>
-    <CopyBackDir>$(ModFiles)\$(SteamIdFileDir)</CopyBackDir>
-  </PropertyGroup>
-  <Target Name="BeforeBuild" Condition="Exists('$(CopyBackFrom)') And !Exists('$(CopyBackTo)')">
-    <Message Text="Copying mod ID file from mod folder back to $(CopyBackTo)" Importance="high" />
-    <Copy SourceFiles="$(CopyBackFrom)" DestinationFolder="$(CopyBackDir)" />
-  </Target>
-  <Target Name="AfterBuild">
-    <Message Text="Moving $(TargetFileName) -&gt; $(AssembliesSubDir)\$(TargetFileName)" Importance="high" />
-    <MakeDir Directories="$(AssembliesDir)" />
-    <Move SourceFiles="$(TargetPath)" DestinationFolder="$(AssembliesDir)" />
-  </Target>
 </Project>

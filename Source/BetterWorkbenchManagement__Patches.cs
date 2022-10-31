@@ -17,7 +17,6 @@ namespace CraftWithColor {
         }
 
         public static void Postfix(Bill_Production sourceBill, Bill_Production destinationBill) {
-            Log.Message("ExtendedBillDataStorage.MirrorBills");
             State.BWM_MirrorBills(sourceBill, destinationBill);
         }
     }
@@ -39,6 +38,6 @@ namespace CraftWithColor {
 
     public static class BetterWorkbenchManagement {
         public static readonly bool Active =
-            ModLister.AllInstalledMods.Any(m => m.PackageIdNonUnique == Strings.BWM_ID && m.Active);
+            ModLister.AllInstalledMods.Any(m => Strings.IsBwmId(m.PackageIdNonUnique) && m.Active);
     }
 }

@@ -25,16 +25,25 @@ namespace CraftWithColor {
         private static float styleCheckPos;
         private static bool posInitialized = false;
         private static bool disabled = false;
-        private static float prevEventHeight = float.MaxValue;
+        private static float prevEventHeight = float.MaxValue; //LateWindowOnGUI
 
-        public static bool Prefix(Rect inRect, Bill_Production ___bill) {
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(Dialog_BillConfig.DoWindowContents))]
+        public static void DoWindowContents(Rect inRect, Bill_Production ___bill) {
             if (ShouldApply(___bill)) {
                 BillAddition add = State.GetAddition(___bill);
                 DrawWidgets(inRect, add);
                 add.UpdateBill();
+            }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("LateWindowOnGUI")]
+        public static void LateWindowOnGUI(Bill_Production ___bill) {
+            if (ShouldApply(___bill)) {
+                BillAddition add = State.GetAddition(___bill);
                 Widgets_Icon_Patch.Next(add);
             }
-            return true;
         }
 
         public static void SetupPosition(float height) {
@@ -53,12 +62,18 @@ namespace CraftWithColor {
                     Range limit = new Range(0f, height / 2);
                     Range range = MySettings.ConflictingCheckboxRange.FindClosestFreeRange(preferred, limit);
                     range.Contract(Gap);
+                    if (MySettings.HasStyleButton) {
+                        range.start += CheckSize + Gap;
+                    }
                     float top = -WidgetsHeight - range.start;
                     stylePos = top;
                     colorPos = top + LabelHeight + Gap;
                     styleCheckPos = stylePos + CheckAdjust;
                     colorCheckPos = colorPos + CheckAdjust;
                     disabled = false;
+                    Map m = Find.CurrentMap;
+                    var b = m.PlayerWealthForStoryteller;
+                    var a = m.PlayerPawnsForStoryteller;
                 } catch (RangeLimitException) {
                     if (!openAnimation) {
                         Main.Instance.Logger.Error(Strings.NoSpaceError + MySettings.ConflictingMods);
@@ -120,8 +135,7 @@ namespace CraftWithColor {
 
         private static void StyleMenu(BillAddition add) {
             var menu = add.Styles.Select(s => MenuOption(add, s)).ToList();
-            // TODO: Refactor this more nicely.
-            FloatSubMenu.VUIEMenuWithColor(menu, add);
+            Find.WindowStack.Add(new FloatMenu(menu));
          }
 
         private static FloatMenuOption MenuOption(BillAddition add, ThingStyleDef style) =>

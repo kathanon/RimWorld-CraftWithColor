@@ -15,22 +15,26 @@ namespace CraftWithColor {
             b => UnityEngine.Random.ColorHSV(),
 
             b => Find.IdeoManager.IdeosInViewOrder
-            .Select<Ideo,Color?>(p => p.ApparelColor)
-            .RandomElementWithFallback(null),
+                .Select<Ideo,Color?>(p => p.ApparelColor)
+                .RandomElementWithFallback(null),
 
             b => Find.CurrentMap.mapPawns.FreeColonists
-            .Select(p => p.story.favoriteColor)
-            .Where(c => c != null)
-            .RandomElementWithFallback(null),
+                .Select(p => p.story.favoriteColor)
+                .Where(c => c != null)
+                .RandomElementWithFallback(null),
 
             b => State.SavedColors
-            .Select<Color,Color?>(c => c)
-            .RandomElementWithFallback(null),
+                .Select<Color,Color?>(c => c)
+                .RandomElementWithFallback(null),
 
             b => DefDatabase<ColorDef>.AllDefs
-            .Where(d => !d.hairOnly)
-            .Select<ColorDef,Color?>(d => d.color)
-            .RandomElementWithFallback(null),
+#if VERSION_1_3
+                .Where(d => !d.hairOnly)
+#else
+                .Where(d => d.colorType != ColorType.Hair)
+#endif
+                .Select<ColorDef,Color?>(d => d.color)
+                .RandomElementWithFallback(null),
         };
 
         private static readonly string[] randomTip = new string[] {
@@ -126,9 +130,9 @@ namespace CraftWithColor {
             targetStyle     = null;
         }
 
-        public BillAddition(Bill_Production bill, BillAddition copyFrom) {
-            this.bill = bill;
+        public BillAddition(Bill_Production bill, BillAddition copyFrom) : this(bill) {
             CopyFrom(copyFrom);
+            originalRecipe = copyFrom.originalRecipe;
         }
 
         public void CopyFrom(BillAddition copyFrom) {

@@ -7,6 +7,13 @@ namespace CraftWithColor
 {
     public class MySettings
     {
+#if VERSION_1_3
+        public const bool DyeRequiresIdeology = true;
+        public const bool HasStyleButton = false;
+#else
+        public const bool DyeRequiresIdeology = false;
+        public static bool HasStyleButton => WithIdeology && Find.IdeoManager.classicMode;
+#endif
         public enum ColorChangeMode { Keep, Switch, RequireDye }
         public enum ColorChangeModeNoIdeo { Keep, Switch }
 
@@ -17,24 +24,33 @@ namespace CraftWithColor
         private static SettingHandle<ColorChangeMode> changeMode;
         private static SettingHandle<ColorChangeModeNoIdeo> changeModeNoIdeo;
 
-        public static bool OnlyStandard => WithIdeology && onlyStandard;
+        private static bool getOnlyStandard => onlyStandard ?? false;
+        private static bool getRequireDye   => requireDye   ?? true;
+        private static bool getStyling      => styling      ?? true;
+        private static bool getSetStyle     => setStyle     ?? true;
+        private static ColorChangeMode getChangeMode => 
+            changeMode ?? ColorChangeMode.Keep;
+        private static ColorChangeModeNoIdeo getChangeModeNoIdeo => 
+            changeModeNoIdeo ?? ColorChangeModeNoIdeo.Keep;
 
-        public static bool RequireDye   => WithIdeology && requireDye;
+        public static bool OnlyStandard => WithIdeology && getOnlyStandard;
 
-        public static bool Styling      => WithIdeology && styling && !onlyStandard;
+        public static bool RequireDye   => (WithIdeology || !DyeRequiresIdeology) && getRequireDye;
 
-        public static bool SetStyle     => setStyle;
+        public static bool Styling      => WithIdeology && getStyling && !getOnlyStandard;
+
+        public static bool SetStyle     => getSetStyle && !HasStyleButton;
 
         public static bool SwitchColor
         {
             get => WithIdeology 
-                ? changeMode != ColorChangeMode.Keep 
-                : changeModeNoIdeo != ColorChangeModeNoIdeo.Keep;
+                ? getChangeMode != ColorChangeMode.Keep 
+                : getChangeModeNoIdeo != ColorChangeModeNoIdeo.Keep;
         }
 
         public static bool SwitchUseDye
         {
-            get => WithIdeology && requireDye && changeMode == ColorChangeMode.RequireDye;
+            get => WithIdeology && getRequireDye && getChangeMode == ColorChangeMode.RequireDye;
         }
 
         public static readonly bool WithIdeology = 
@@ -56,6 +72,8 @@ namespace CraftWithColor
                     Strings.Styling_title,
                     Strings.Styling_desc,
                     true);
+            }
+            if (WithIdeology || !DyeRequiresIdeology) {
                 requireDye = pack.GetHandle(
                     "requireDye",
                     Strings.RequireDye_title,
@@ -115,7 +133,7 @@ namespace CraftWithColor
                 };
             }
 
-            var dict = Strings.MODS_CONFLICTING_WITH_CHECKBOX_POS;
+            var dict = Strings.OverlapingMods;
             foreach (var mod in ModLister.AllInstalledMods.Where(m => dict.ContainsKey(m.PackageIdNonUnique) && m.Active))
             {
                 ConflictingCheckboxRange.Merge(dict[mod.PackageIdNonUnique]);

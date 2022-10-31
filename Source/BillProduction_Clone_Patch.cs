@@ -9,7 +9,6 @@ namespace CraftWithColor
     {
         public static void Postfix(Bill_Production __instance, Bill __result)
         {
-            Log.Message("Bill_Production.Clone");
             State.AddClone(__instance, (Bill_Production) __result);
         }
     }

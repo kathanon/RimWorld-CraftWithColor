@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Verse;
 
 namespace CraftWithColor
@@ -9,13 +10,15 @@ namespace CraftWithColor
         public const string MOD_IDENTIFIER = "kathanon.CraftWithColor";
         public const string PREFIX = MOD_IDENTIFIER + ".";
 
-        public const string BWM_ID  = "falconne.bwm";
-        public const string VUIE_ID = "vanillaexpanded.ui";
+        public const string BWM_ID      = "falconne.bwm";
+        public const string BWM_TEMP_ID = "falconne.bwm.tempupdate";
+        public static bool IsBwmId(string id) => id == BWM_ID || id == BWM_TEMP_ID;
 
-        public static readonly Dictionary<string, Range> MODS_CONFLICTING_WITH_CHECKBOX_POS = new Dictionary<string, Range>
+        public static readonly Dictionary<string, Range> OverlapingMods = new Dictionary<string, Range>
         {
             // Range is distance from bottom margin of dialog
-            { BWM_ID, new Range(67f, 30f) }
+            { BWM_ID,      new Range(60f, 60f) },
+            { BWM_TEMP_ID, new Range(60f, 60f) },
         };
 
         // Menus and dialogs
