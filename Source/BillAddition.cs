@@ -51,9 +51,11 @@ namespace CraftWithColor {
         private Bill_Production bill;
         private Color targetColor;
         private RandomType random = RandomType.None;
-        private ThingStyleDef targetStyle;
+        private StyleSetting targetStyle;
+        private ThingStyleDef saveStyleDef;
+        private int saveStyleId;
 
-        private IEnumerable<ThingStyleDef> availableStyles;
+        private List<StyleSetting> availableStyles;
         private bool colorable;
 
         public bool colorActive = false;
@@ -74,13 +76,15 @@ namespace CraftWithColor {
             get => random;
             set { 
                 random = value;
-                TriggerRandom();
+                TriggerRandomColor();
             }
         }
 
         public string RandomColorTip => randomTip[(int) random];
 
         public bool HasRandomColor => random != RandomType.None;
+
+        public bool HasRandomStyle => targetStyle is RandomStyle;
 
         public static readonly RandomColorAccessor RandomColor = new RandomColorAccessor();
 
@@ -95,28 +99,33 @@ namespace CraftWithColor {
 
         public Color? ActiveColor => colorActive ? (Color?) TargetColor : null;
 
-        public IEnumerable<ThingStyleDef> Styles => availableStyles;
+        public Color MenuColor => colorActive ? TargetColor : Color.white;
+
+        public IEnumerable<StyleSetting> Styles 
+            => availableStyles;
 
         public ThingStyleDef TargetStyle {
+            get => targetStyle.Style;
+        }
+
+        public StyleSetting StyleSelection {
             get => targetStyle;
             set {
-                if (availableStyles.Contains(value)) {
-                    targetStyle = value;
-                }
+                targetStyle = value;
+                value.TriggerRandom();
             }
         }
 
-        public bool UseStyle => styleActive && MySettings.SetStyle;
-
-        public ThingStyleDef ActiveStyle => UseStyle ? targetStyle : null;
-
         public bool CanColor => colorable;
 
-        public bool CanStyle => availableStyles.Any() && MySettings.SetStyle;
+        public bool CanStyle => availableStyles.Skip(2).Any() && MySettings.SetStyle;
 
         public bool Update => true;
 
         public ThingDef Thing => bill.recipe.ProducedThingDef;
+
+        public override string ToString() => 
+            $"{originalRecipe.defName}: color = {colorActive}/{targetColor}, style = {styleActive}/{targetStyle}";
 
         public BillAddition() { }
 
@@ -126,8 +135,8 @@ namespace CraftWithColor {
             originalRecipe  = bill.recipe;
             targetColor     = State.DefaultColor;
             colorable       = thing.HasComp(typeof(CompColorable));
-            availableStyles = State.StylesFor(thing);
-            targetStyle     = null;
+            availableStyles = StylesFor(thing);
+            targetStyle     = availableStyles[0];
         }
 
         public BillAddition(Bill_Production bill, BillAddition copyFrom) : this(bill) {
@@ -138,9 +147,17 @@ namespace CraftWithColor {
         public void CopyFrom(BillAddition copyFrom) {
             targetColor     = copyFrom.targetColor;
             colorActive     = copyFrom.colorActive;
-            targetStyle     = copyFrom.targetStyle;
             random          = copyFrom.random;
-            availableStyles = State.StylesFor(copyFrom.originalRecipe.ProducedThingDef);
+            availableStyles = StylesFor(copyFrom.originalRecipe.ProducedThingDef);
+            targetStyle     = CopyStyle(copyFrom.targetStyle);
+        }
+
+        private List<StyleSetting> StylesFor(ThingDef thing) {
+            var list = new List<StyleSetting>();
+            list.Add(new BasicStyle(this, 0));
+            list.AddRange(State.StylesFor(thing).Select(s => new ExplicitStyle(this, 1, s)));
+            list.Add(new RandomStyle(this, 2, thing));
+            return list;
         }
 
         public RecipeDef ColoredRecipie {
@@ -157,8 +174,13 @@ namespace CraftWithColor {
 
         public RecipeDef OriginalRecipe => originalRecipe;
 
-        public void TriggerRandom() => 
+        public void TriggerRandomColor() => 
             targetColor = RandomColor[this] ?? RandomColor[RandomType.Any] ?? Color.white;
+
+        public void TriggerRandom() {
+            TriggerRandomColor();
+            targetStyle.TriggerRandom();
+        }
 
         public void TriggerRecolor() {
             if (colorActive && MySettings.SwitchColor && random == RandomType.None) {
@@ -248,11 +270,17 @@ namespace CraftWithColor {
         }
 
         public void ExposeData() {
-            Scribe_Values.Look(ref colorActive, "active", false);
-            Scribe_Values.Look(ref targetColor, "color", forceSave: true);
-            Scribe_Values.Look(ref styleActive, "styleActive", false);
-            Scribe_Values.Look(ref random, "random", RandomType.None);
-            Scribe_Defs.Look(ref targetStyle, "style");
+            if (Scribe.mode == LoadSaveMode.Saving) {
+                saveStyleId = targetStyle.Id;
+                saveStyleDef = targetStyle.Style;
+            }
+
+            Scribe_Values.Look(ref colorActive,  "active",      false);
+            Scribe_Values.Look(ref targetColor,  "color",       forceSave: true);
+            Scribe_Values.Look(ref styleActive,  "styleActive", false);
+            Scribe_Values.Look(ref random,       "random",      RandomType.None);
+            Scribe_Values.Look(ref saveStyleId,  "styleType",   -1);
+            Scribe_Defs.Look(ref saveStyleDef,   "style");
             Scribe_Defs.Look(ref originalRecipe, "recipie");
         }
 
@@ -263,9 +291,109 @@ namespace CraftWithColor {
 
             ThingDef thing = Thing;
             if (availableStyles == null) {
-                availableStyles = State.StylesFor(thing);
+                availableStyles = StylesFor(thing);
             }
+            targetStyle = StyleFromIdDef(saveStyleId, saveStyleDef);
             colorable = thing.HasComp(typeof(CompColorable));
+        }
+
+        private StyleSetting StyleFromIdDef(int id, ThingStyleDef def) 
+            => availableStyles.Find(x => x.Match(id, def)) ?? availableStyles[0];
+
+        private StyleSetting CopyStyle(StyleSetting style) 
+            => StyleFromIdDef(style.Id, style.Style);
+
+        public abstract class StyleSetting {
+            protected readonly BillAddition add;
+            private readonly int id;
+
+            protected StyleSetting(BillAddition add, int id) {
+                this.add = add;
+                this.id = id;
+            }
+
+            public abstract ThingStyleDef Style { get; }
+
+            public virtual FloatMenuOption MenuOption {
+                get {
+                    var opt = new FloatMenuOption(Label, Set, add.Thing) {
+                        forceThingColor = add.ActiveColor,
+                    };
+                    UpdateMenuOption(opt);
+                    return opt;
+                }
+            }
+
+            public abstract string Label { get; }
+
+            protected virtual void UpdateMenuOption(FloatMenuOption opt) {}
+
+            internal virtual void TriggerRandom() {}
+
+            public int Id => id;
+
+            public virtual bool Match(int id, ThingStyleDef style)
+                => this.id == id;
+
+            protected bool MatchCompat(int id)
+                => this.id == id || id < 0;
+
+            protected void Set() 
+                => add.StyleSelection = this;
+        }
+
+        public class ExplicitStyle : StyleSetting {
+            private readonly ThingStyleDef style;
+
+            public ExplicitStyle(BillAddition add, int id, ThingStyleDef style) : base(add, id)
+                => this.style = style;
+
+            public override ThingStyleDef Style => style;
+
+            protected override void UpdateMenuOption(FloatMenuOption opt) 
+                => opt.thingStyle = style;
+
+            public override string Label 
+                => style.Category?.LabelCap ?? style.overrideLabel?.CapitalizeFirst() ?? style.defName;
+
+            public override bool Match(int id, ThingStyleDef style)
+                => style == this.style && MatchCompat(id);
+        }
+
+        public class BasicStyle : StyleSetting {
+            public BasicStyle(BillAddition add, int id) : base(add, id) {}
+
+            public override ThingStyleDef Style => null;
+
+#if !VERSION_1_3
+            protected override void UpdateMenuOption(FloatMenuOption opt) 
+                => opt.forceBasicStyle = true;
+#endif
+
+            public override string Label
+                => Strings.BasicStyle;
+
+            public override bool Match(int id, ThingStyleDef style)
+                => style == null && MatchCompat(id);
+        }
+
+        public class RandomStyle : StyleSetting {
+            private ThingStyleDef current;
+            private readonly ThingDef thing;
+
+            public RandomStyle(BillAddition add, int id, ThingDef thing) : base(add, id)
+                => this.thing = thing;
+
+            public override ThingStyleDef Style => current;
+
+            public override FloatMenuOption MenuOption
+                => new FloatMenuOption(Label, Set, Textures.RandomMenu, add.MenuColor);
+
+            public override string Label 
+                => Strings.RandomStyle;
+
+            internal override void TriggerRandom() 
+                => current = State.StylesFor(thing).Prepend(null).RandomElement();
         }
     }
 

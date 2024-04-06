@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using FloatSubMenus;
+using HarmonyLib;
 using RimWorld;
 using System;
 using System.Linq;
@@ -6,8 +7,8 @@ using UnityEngine;
 using Verse;
 
 namespace CraftWithColor {
-    [HarmonyPatch(typeof(Dialog_BillConfig), nameof(Dialog_BillConfig.DoWindowContents))]
-    public static class DialogBillConfig_DoWindowContents_Patch {
+    [HarmonyPatch(typeof(Dialog_BillConfig))]
+    public static class DialogBillConfig_Patches {
         private const float CheckSize     = 24f;
         private const float LabelHeight   = CheckSize;
         private const float IconSize      = 28f;
@@ -25,18 +26,25 @@ namespace CraftWithColor {
         private static float styleCheckPos;
         private static bool posInitialized = false;
         private static bool disabled = false;
-        private static float prevEventHeight = float.MaxValue; //LateWindowOnGUI
+        private static float prevEventHeight = float.MaxValue;
 
         [HarmonyPrefix]
         [HarmonyPatch(nameof(Dialog_BillConfig.DoWindowContents))]
-        public static void DoWindowContents(Rect inRect, Bill_Production ___bill) {
-            if (ShouldApply(___bill)) {
-                BillAddition add = State.GetAddition(___bill);
-                DrawWidgets(inRect, add);
+        public static void DoWindowContents_Pre(Rect inRect, Bill_Production ___bill) =>
+            DoWindowContents(inRect, ___bill, 0f);
+
+        public static void DoWindowContents(Rect inRect, Bill_Production bill, float widthAdj) {
+            if (ShouldApply(bill)) {
+                BillAddition add = State.GetAddition(bill);
+                DrawWidgets(inRect, add, widthAdj);
                 add.UpdateBill();
+#if VERSION_1_3
+                Widgets_Icon_Patch.Next(add);
+#endif
             }
         }
 
+#if !VERSION_1_3
         [HarmonyPrefix]
         [HarmonyPatch("LateWindowOnGUI")]
         public static void LateWindowOnGUI(Bill_Production ___bill) {
@@ -45,6 +53,7 @@ namespace CraftWithColor {
                 Widgets_Icon_Patch.Next(add);
             }
         }
+#endif
 
         public static void SetupPosition(float height) {
             if (!posInitialized) {
@@ -84,10 +93,10 @@ namespace CraftWithColor {
             }
         }
 
-        private static void DrawWidgets(Rect inRect, BillAddition add) {
+        private static void DrawWidgets(Rect inRect, BillAddition add, float widthAdj) {
             SetupPosition(inRect.height);
             if (!disabled) {
-                float width = Mathf.Floor((inRect.width - 34f) / 3f);
+                float width = Mathf.Floor((inRect.width - 34f) / 3f + widthAdj);
                 Text.Font = GameFont.Small;
                 Color old = GUI.color;
                 Color dim = SelectColorDialog.Dimmed(old);
@@ -114,35 +123,25 @@ namespace CraftWithColor {
                 if (add.CanStyle) {
                     Rect checkRect = new Rect(0f, inRect.yMax + styleCheckPos, width - IconSpace, LabelHeight);
                     Rect styleRect = new Rect(width - IconSize, inRect.yMax + stylePos, IconSize, IconSize);
-                    bool oldValue = add.styleActive;
                     Widgets.CheckboxLabeled(checkRect, Strings.StyleItem, ref add.styleActive, placeCheckboxNearText: false);
                     if (add.styleActive) {
                         ThingStyleDef style = add.TargetStyle;
-                        if (style == null && !oldValue || Widgets.ButtonInvisible(styleRect)) {
-                            StyleMenu(add);
+                        if (Widgets.ButtonInvisible(styleRect)) {
+                            add.Styles.Select(s => s.MenuOption).OpenMenu();
                         }
                         GUI.color = dim;
                         Widgets.DrawBox(styleRect);
                         GUI.color = old;
-                        if (style != null) {
+                        if (add.HasRandomStyle) {
+                            Widgets.DrawTextureFitted(styleRect, Textures.RandomMenu, 1f);
+                        } else {
                             Widgets.DefIcon(styleRect, add.Thing, thingStyleDef: style);
-                            TooltipHandler.TipRegion(styleRect, style.Category.LabelCap);
                         }
+                        TooltipHandler.TipRegion(styleRect, add.StyleSelection.Label);
                     }
                 }
             }
         }
-
-        private static void StyleMenu(BillAddition add) {
-            var menu = add.Styles.Select(s => MenuOption(add, s)).ToList();
-            Find.WindowStack.Add(new FloatMenu(menu));
-         }
-
-        private static FloatMenuOption MenuOption(BillAddition add, ThingStyleDef style) =>
-            new FloatMenuOption(style.Category.LabelCap, () => add.TargetStyle = style, add.Thing) {
-                thingStyle = style,
-                forceThingColor = add.ActiveColor,
-            };
 
         private static bool ShouldApply(Bill_Production bill) => ShouldApply(bill?.recipe?.ProducedThingDef);
 

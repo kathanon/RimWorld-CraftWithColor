@@ -33,7 +33,7 @@ namespace CraftWithColor
                         CompColorable comp = ToilsUtil.GetColorable(job);
                         if (comp != null) {
                             comp.SetColor(color.Value);
-                            if (createUnfinished) add?.TriggerRandom();
+                            if (createUnfinished) add?.TriggerRandomColor();
                         }
                     }
                 };

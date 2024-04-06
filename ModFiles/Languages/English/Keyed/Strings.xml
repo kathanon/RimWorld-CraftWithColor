@@ -14,6 +14,9 @@
 	<kathanon.CraftWithColor.RandomFavo>Favorite color of random colonist</kathanon.CraftWithColor.RandomFavo>
 	<kathanon.CraftWithColor.RandomSaved>Random saved color</kathanon.CraftWithColor.RandomSaved>
 	<kathanon.CraftWithColor.RandomStd>Random standard color</kathanon.CraftWithColor.RandomStd>
+  
+	<kathanon.CraftWithColor.BasicStyle>Basic style</kathanon.CraftWithColor.BasicStyle>
+	<kathanon.CraftWithColor.RandomStyle>Random style</kathanon.CraftWithColor.RandomStyle>
 	
 	<kathanon.CraftWithColor.SelectColor>Select color</kathanon.CraftWithColor.SelectColor>
 	<kathanon.CraftWithColor.R>R</kathanon.CraftWithColor.R>

@@ -17,6 +17,7 @@ namespace CraftWithColor
         private readonly List<Color> standardColors;
 
         private Color color;
+        private bool useVanilla = false;
 
         public SelectColorDialog(ITargetColor target, List<Color> standardColors = null)
         {
@@ -106,21 +107,19 @@ namespace CraftWithColor
 
         public List<Color> StandardColors { get => standardColors ?? DefaultColors; }
 
-        public List<Color> DefaultColors
-        {
-            get
-            {
-                if (defaultColorsCache == null)
-                {
+        public static List<Color> DefaultColors {
+            get {
+                if (defaultColorsCache == null) {
                     defaultColorsCache = (
                         from x in DefDatabase<ColorDef>.AllDefsListForReading
 #if VERSION_1_3
                         where !x.hairOnly
 #else
-                        where x.colorType != ColorType.Hair
+                        where x.colorType == ColorType.Ideo || x.colorType == ColorType.Misc
 #endif
                         select x.color
                         ).ToList();
+                    defaultColorsCache.SortByColor(x => x);
                 }
                 return defaultColorsCache;
             }
@@ -169,50 +168,82 @@ namespace CraftWithColor
         private const string WideDecContent = "255";
 
         private static readonly Color dimmedMult = new Color(0.4f, 0.4f, 0.4f);
-        private Color normalColor;
-        private Color dimmedColor;
-        private GUIStyle textBoxRightAlign;
+        private static Color normalColor;
+        private static Color dimmedColor;
+        private static GUIStyle textBoxRightAlign;
+        private static bool setupDone;
 
         public static Color Dimmed(Color color) => color * dimmedMult;
 
         public const int SavedColorsMax = ColorListSavedRows * ColorListColumns;
 
-        public override void DoWindowContents(Rect inRect)
-        {
-            if (target.Update && target.TargetColor != color)
-            {
+        public override void DoWindowContents(Rect inRect) {
+            if (target.Update && target.TargetColor != color) {
                 color = target.TargetColor;
             }
 
             bool saved = State.SavedColors.FindIndex(c => c.IndistinguishableFrom(color)) > -1;
             bool savedMax = State.SavedColors.Count >= SavedColorsMax;
-
-            normalColor = GUI.color;
-            dimmedColor = Dimmed(normalColor);
-            textBoxRightAlign = new GUIStyle(Text.CurTextFieldStyle) { alignment = TextAnchor.MiddleRight };
+            Setup();
 
             Rect labelRect = inRect.TopPartPixels(DialogLabelHeight).ContractedBy(DialogMarginAdjust, 0f);
             inRect = inRect.BottomPartPixels(inRect.height - DialogLabelHeight).ContractedBy(DialogMarginAdjust);
-            Rect colorRect = new Rect(inRect.x, inRect.y, ColorWidth, ColorHeight);
-            Rect[] sliderRect = new Rect(inRect.x, colorRect.yMax + SmallGap, ColorWidth, SlidersHeight).SliceHorizontal(3);
-            Rect hexRect = new Rect(inRect.x, sliderRect[2].yMax + SmallGap, ColorWidth, TextBoxHeight);
-            float colorListsLeft = colorRect.xMax + Gap;
-            Rect colorList = new Rect(colorListsLeft, inRect.y, ColorListWidth, 0f);
-            Rect[] buttonRect = new Rect(inRect.x, inRect.yMax - ButtonsHeight, inRect.width, ButtonsHeight).SliceVertical(4, ButtonsGap);
+            Rect vanillaCheck = new Rect(inRect.x + ColorWidth + Gap, inRect.y - Gap - Widgets.CheckboxSize,
+                                         ColorListWidth, Widgets.CheckboxSize);
+            Rect[] buttonRect = new Rect(inRect.x, inRect.yMax - ButtonsHeight,
+                                         inRect.width, ButtonsHeight)
+                .SliceVertical(4, ButtonsGap);
             TextAnchor anchor = Text.Anchor;
 
             Text.Font = GameFont.Medium;
             Widgets.Label(labelRect, Strings.SelectColor);
             Text.Font = GameFont.Small;
 
-            Widgets.DrawBoxSolid(colorRect, color);
-            if (MySettings.WithIdeology && Widgets.ButtonInvisible(colorRect))
-            {
-                ColorMenu.Open(this);
+            //Widgets.CheckboxLabeled(vanillaCheck, "Use vanilla color selector", ref useVanilla);
+
+            if (useVanilla) {
+                DoVanillaColorSelector(inRect, ref color);
+            } else {
+                DoCustomColorSelector(inRect, ref color, () => ColorMenu.Open(this));
             }
 
-            if (!MySettings.OnlyStandard)
-            {
+            Text.Anchor = anchor;
+            if (!MySettings.OnlyStandard) {
+                DisablableButton(buttonRect[0], Strings.Delete, () => State.SavedColors.Remove(color), saved);
+                DisablableButton(buttonRect[1], Strings.Save, () => State.SavedColors.Add(color), !saved && !savedMax);
+            }
+            DisablableButton(buttonRect[2], Strings.Cancel, Cancel);
+            DisablableButton(buttonRect[3], Strings.Accept, Accept);
+
+            if (target.Update && target.TargetColor != color) {
+                target.TargetColor = color;
+            }
+        }
+
+        public static void Setup() {
+            if (!setupDone) {
+                normalColor = GUI.color;
+                dimmedColor = Dimmed(normalColor);
+                textBoxRightAlign = new GUIStyle(Text.CurTextFieldStyle) { alignment = TextAnchor.MiddleRight };
+                setupDone = true;
+            }
+        }
+
+        private static void DoVanillaColorSelector(Rect inRect, ref Color color) => throw new NotImplementedException();
+
+        private static void DoCustomColorSelector(Rect inRect, ref Color color, Action onColorClick = null) {
+            Rect colorRect = new Rect(inRect.x, inRect.y, ColorWidth, ColorHeight);
+            Rect[] sliderRect = new Rect(inRect.x, colorRect.yMax + SmallGap, ColorWidth, SlidersHeight).SliceHorizontal(3);
+            Rect hexRect = new Rect(inRect.x, sliderRect[2].yMax + SmallGap, ColorWidth, TextBoxHeight);
+            float colorListsLeft = colorRect.xMax + Gap;
+            Rect colorList = new Rect(colorListsLeft, inRect.y, ColorListWidth, 0f);
+
+            Widgets.DrawBoxSolid(colorRect, color);
+            if (onColorClick != null && MySettings.WithIdeology && Widgets.ButtonInvisible(colorRect)) {
+                onColorClick();
+            }
+
+            if (!MySettings.OnlyStandard) {
                 Text.Anchor = TextAnchor.MiddleLeft;
                 ColorSlider(sliderRect[0], Strings.R, ref color.r);
                 ColorSlider(sliderRect[1], Strings.G, ref color.g);
@@ -222,31 +253,15 @@ namespace CraftWithColor
             }
 
             Text.Anchor = TextAnchor.UpperLeft;
-            if (MySettings.WithIdeology)
-            {
-                ColorSelector(ref colorList, Strings.Standard, DefaultColors, ColorListStandardRows);
+            if (MySettings.WithIdeology) {
+                ColorSelector(ref colorList, ref color, Strings.Standard, DefaultColors, ColorListStandardRows);
             }
-            if (!MySettings.OnlyStandard)
-            {
-                ColorSelector(ref colorList, Strings.Saved, State.SavedColors, ColorListSavedRows);
-            }
-
-            Text.Anchor = anchor;
-            if (!MySettings.OnlyStandard)
-            {
-                DisablableButton(buttonRect[0], Strings.Delete, () => State.SavedColors.Remove(color), saved);
-                DisablableButton(buttonRect[1], Strings.Save, () => State.SavedColors.Add(color), !saved && !savedMax);
-            }
-            DisablableButton(buttonRect[2], Strings.Cancel, Cancel);
-            DisablableButton(buttonRect[3], Strings.Accept, Accept);
-
-            if (target.Update && target.TargetColor != color)
-            {
-                target.TargetColor = color;
+            if (!MySettings.OnlyStandard) {
+                ColorSelector(ref colorList, ref color, Strings.Saved, State.SavedColors, ColorListSavedRows);
             }
         }
 
-        private void ColorSlider(Rect rect, string label, ref float value)
+        private static void ColorSlider(Rect rect, string label, ref float value)
         {
             rect.y -= LabelCenterAdjustY;
             Widgets.Label(rect, label);
@@ -255,7 +270,7 @@ namespace CraftWithColor
             value = Widgets.HorizontalSlider(rect, value, 0f, 1f);
         }
 
-        private void ColorSelector(ref Rect rect, string label, List<Color> list, int rows)
+        private static void ColorSelector(ref Rect rect, ref Color color, string label, List<Color> list, int rows)
         {
             rect.height = ColorListHeight + rows * ColorListSquareSize;
             float colorsHeight = rows * ColorListSquareSize - ColorListColorsAdjust;
@@ -276,7 +291,7 @@ namespace CraftWithColor
             rect.y += rect.height + Gap;
         }
 
-        private void ColorBoxes(Rect rect, ref Color color)
+        private static void ColorBoxes(Rect rect, ref Color color)
         {
             float hexWidth = Text.CalcSize(WideHexContent).x + TextBoxMargin;
             float decWidth = Text.CalcSize(WideDecContent).x + TextBoxMargin;
@@ -313,7 +328,7 @@ namespace CraftWithColor
             ColorDecBox(decRect[2], ref color.b);
         }
 
-        private void ColorDecBox(Rect rect, ref float value)
+        private static void ColorDecBox(Rect rect, ref float value)
         {
             int intValue = Mathf.RoundToInt(255f * value);
             string oldText = intValue.ToString();

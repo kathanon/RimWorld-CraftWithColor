@@ -4,27 +4,31 @@ using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace CraftWithColor
-{
-    [HarmonyPatch(typeof(GenRecipe), nameof(GenRecipe.MakeRecipeProducts))]
-    public static partial class GenRecipe_MakeRecipeProducts_Patch
-    {
-        public static IEnumerable<Thing> Postfix(IEnumerable<Thing> result)
-        {
-            return new EnumerableWithActionOnNext<Thing>(result, Process);
+namespace CraftWithColor {
+    [HarmonyPatch(typeof(GenRecipe), "PostProcessProduct")]
+    public static partial class GenRecipe_MakeRecipeProducts_Patch {
+        public static void Prefix(Thing product, ref Precept_ThingStyle precept) {
+            if (product != null) {
+                var def = product.def;
+                if (State.StyleActiveForLast(def)) {
+                    precept = null;
+                }
+            }
         }
 
-        private static void Process(Thing thing)
-        {
-            Color? color = State.ColorForLast(thing?.def);
-            if (color.HasValue)
-            {
-                thing.TryGetComp<CompColorable>()?.SetColor(color.Value);
-            }
+        public static void Postfix(Thing product) {
+            if (product != null) {
+                product = product.GetInnerIfMinified();
+                var def = product.def;
+                Color? color = State.ColorForLast(def);
+                if (color.HasValue) {
+                    product.TryGetComp<CompColorable>()?.SetColor(color.Value);
+                }
 
-            ThingStyleDef style = State.StyleForLast(thing?.def);
-            if (style != null) {
-                thing.TryGetComp<CompStyleable>()?.SetStyle(style);
+                if (State.StyleActiveForLast(def)) {
+                    var style = State.StyleForLast(def);
+                    product.StyleDef = style;
+                }
             }
         }
     }

@@ -13,18 +13,20 @@ namespace CraftWithColor
 
         private const int ButtonSize = 3;
 
-        public static void Postfix(Rect rect, List<Color> colors, Texture icon, int colorSize, int colorPadding)
-        {
-            if (skip)
-            {
+        [HarmonyPrefix]
+        public static void ColorSelector_Pre(Rect rect, List<Color> colors, Texture icon, int colorSize, int colorPadding)
+            => ColorSelector(rect, colors, icon, colorSize, colorPadding, 4 * colorSize);
+
+        public static float ColorSelector(Rect rect, List<Color> colors, Texture icon, int colorSize, int colorPadding, int iconSize) {
+            if (skip) {
                 skip = false;
-                return;
+                return 0f;
             }
 
-            if (queue.Count == 0) return;
+            if (queue.Count == 0) return 0f;
 
             ITargetColor target = queue.Dequeue();
-            int iconSpace = (icon == null) ? 0 : 4 * colorSize + 10;
+            int iconSpace = (icon == null) ? 0 : iconSize + 10;
             float colorWidth = rect.width - iconSpace;
             int squareSpace = colorSize + 3 * colorPadding;
             int cols = (int) (colorWidth / squareSpace);
@@ -38,11 +40,10 @@ namespace CraftWithColor
             int height = rows * squareSpace;
             int buttonWidth = ButtonSize * squareSpace - colorPadding;
             Rect button = new Rect(rect.x + iconSpace + width - buttonWidth, rect.y + height + yAdjust, buttonWidth, squareSpace - colorPadding);
-            //Main.Instance.Logger.Message($"{rect}, {button}, {squareSpace}, {perRow}, {rows}, {height}, {buttonWidth}");
-            if (Widgets.ButtonText(button, Strings.More))
-            {
+            if (Widgets.ButtonText(button, Strings.More)) {
                 SelectColorDialog.Open(target, colors);
             }
+            return button.yMax;
         }
 
         internal static void Skip() { skip = true; }

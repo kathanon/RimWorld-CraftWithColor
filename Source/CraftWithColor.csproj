@@ -27,9 +27,6 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- RimWorld DLLs -->
-    <Reference Include="0Harmony, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL" Private="False">
-      <HintPath>..\packages\Lib.Harmony.2.2.2\lib\net472\0Harmony.dll</HintPath>
-    </Reference>
     <Reference Include="Assembly-CSharp" Private="False">
       <HintPath>$(RimWorld)\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
@@ -45,11 +42,15 @@
     <Reference Include="UnityEngine.UI" Private="False">
       <HintPath>$(RimWorld)\RimWorldWin64_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
-    <Reference Include="HugsLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" Private="False">
-      <HintPath>..\packages\UnlimitedHugs.Rimworld.HugsLib.9.0.1\lib\net472\HugsLib.dll</HintPath>
+    <!-- Mod Dlls -->
+    <Reference Include="0Harmony" Private="False">
+      <HintPath>$(HarmonyPath)</HintPath>
+    </Reference>
+    <Reference Include="HugsLib" Private="False">
+      <HintPath>$(HugsLibPath)</HintPath>
     </Reference>
     <Reference Include="FloatSubMenu" Private="False">
-      <HintPath>$(Workshop)\2864015430\$(RimWorldVersion)\Assemblies\FloatSubMenu.dll</HintPath>
+      <HintPath>$(FloatSubMenuPath)</HintPath>
     </Reference>
     <Reference Include="ImprovedWorkbenches" Private="False">
       <HintPath>$(Workshop)\935982361\Assemblies\ImprovedWorkbenches.dll</HintPath>
@@ -66,16 +67,17 @@
   <ItemGroup>
     <Compile Include="BetterWorkbenchManagement__Patches.cs" />
     <Compile Include="BillAddition.cs" />
-    <Compile Include="BillProduction_Clone_Patch.cs" />
+    <Compile Include="BillProduction_Patches.cs" />
     <Compile Include="BillStack_Delete_Patch.cs" />
     <Compile Include="ITabBills_FillTab_Patch.cs" />
     <Compile Include="ColorMenu.cs" />
-    <Compile Include="DialogBillConfig_DoWindowContents_Patch.cs" />
-    <Compile Include="DialogStylingStation_DoWindowContents_Patch.cs" />
+    <Compile Include="DialogBillConfig_Patches.cs" />
+    <Compile Include="AddMoreColorsButton_Patch.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="GenRecipe_MakeRecipeProducts_Patch.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="EnumerableWithActionOnNext.cs" />
+    <Compile Include="Math_Compat.cs" />
     <Compile Include="MySettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Range.cs" />

@@ -36,7 +36,7 @@ namespace CraftWithColor
         }
 
         private static FloatMenuOption RandomOption(ITargetColor target, RandomType type) =>
-            new FloatMenuOption(Strings.Random, () => target.RandomColorType = type);
+            new FloatMenuOption(Strings.Random, () => target.RandomColorType = type, Textures.RandomMenu, Color.white);
 
         private static List<FloatMenuOption> SavedSubMenu(ITargetColor target) =>
             SubMenuItems(target, State.SavedColors, RandomType.Saved, c => c, c => " ");

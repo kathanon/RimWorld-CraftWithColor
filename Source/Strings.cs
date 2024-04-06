@@ -7,11 +7,13 @@ namespace CraftWithColor
     internal static class Strings
     {
         // Non-translated constants
-        public const string MOD_IDENTIFIER = "kathanon.CraftWithColor";
-        public const string PREFIX = MOD_IDENTIFIER + ".";
+        public const string ID = "kathanon.CraftWithColor";
+        public const string PREFIX = ID + ".";
+        public static readonly string DEF = PREFIX.Replace('.', '_');
 
         public const string BWM_ID      = "falconne.bwm";
         public const string BWM_TEMP_ID = "falconne.bwm.tempupdate";
+        public const string MATH_ID     = "crunchyduck.math";
         public static bool IsBwmId(string id) => id == BWM_ID || id == BWM_TEMP_ID;
 
         public static readonly Dictionary<string, Range> OverlapingMods = new Dictionary<string, Range>
@@ -34,6 +36,8 @@ namespace CraftWithColor
         public static readonly string RandomFavo   = (PREFIX + "RandomFavo"  ).Translate();
         public static readonly string RandomSaved  = (PREFIX + "RandomSaved" ).Translate();
         public static readonly string RandomStd    = (PREFIX + "RandomStd"   ).Translate();
+        public static readonly string BasicStyle   = (PREFIX + "BasicStyle"  ).Translate();
+        public static readonly string RandomStyle  = (PREFIX + "RandomStyle" ).Translate();
         public static readonly string SelectColor  = (PREFIX + "SelectColor" ).Translate();
         public static readonly string R            = (PREFIX + "R"           ).Translate();
         public static readonly string G            = (PREFIX + "G"           ).Translate();

@@ -9,6 +9,7 @@ namespace CraftWithColor
     {
         private static Color? nextColor = null;
         private static ThingStyleDef nextStyle = null;
+        private static bool doNextStyle = false;
 
         [HarmonyPatch(nameof(Widgets.ThingIcon), 
             typeof(Rect), typeof(ThingDef), typeof(ThingDef), typeof(ThingStyleDef), typeof(float), typeof(Color?)
@@ -34,20 +35,16 @@ namespace CraftWithColor
             )]
         [HarmonyPrefix]
         public static void GetIconFor(ref ThingStyleDef thingStyleDef) {
-            if (nextStyle != null) {
+            if (doNextStyle) {
                 thingStyleDef = nextStyle;
-                nextStyle = null;
+                doNextStyle = false;
             }
-        }
-
-        public static void Next(Color? color = null, ThingStyleDef style = null) {
-            nextColor = color;
-            nextStyle = style;
         }
 
         public static void Next(BillAddition add) {
             nextColor = add.ActiveColor;
-            nextStyle = add.ActiveStyle;
+            nextStyle = add.TargetStyle;
+            doNextStyle = add.styleActive;
         }
     }
 }
