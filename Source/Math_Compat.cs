@@ -13,7 +13,7 @@ namespace CraftWithColor {
     public static class Math_Compat {
 
         public static readonly bool Active = 
-            ModLister.AllInstalledMods.Any(m => m.PackageIdNonUnique == Strings.MATH_ID && m.Active);
+            ModLister.AllInstalledMods.Any(m => m.PackageIdNonUnique == StaticStrings.MATH_ID && m.Active);
 
         public static readonly Type Dialog =
             Active ? Find("CrunchyDuck.Math.", "Dialog_MathBillConfig", "", "Dialogs.") : null;

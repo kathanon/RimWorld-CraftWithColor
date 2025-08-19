@@ -1,32 +1,34 @@
 ﻿using HarmonyLib;
-using HugsLib.Utils;
 using RimWorld;
+using UnityEngine;
 using Verse;
 
+namespace CraftWithColor {
+    [StaticConstructorOnStartup]
+    public class ModMain : Mod {
+        private static ModMain Instance;
 
-namespace CraftWithColor
-{
-    public class Main : HugsLib.ModBase {
-        public Main() 
+        static ModMain() 
+            => new Harmony(StaticStrings.ID).PatchAll();
+
+        public ModMain(ModContentPack content) : base(content) 
             => Instance = this;
 
-        internal new ModLogger Logger => base.Logger;
+        public override string SettingsCategory() 
+            => StaticStrings.Name;
 
-        internal static Main Instance { get; private set; }
+        public override void DoSettingsWindowContents(Rect inRect) 
+            => MySettings.Instance.DoGUI(inRect);
 
-        public override string ModIdentifier => Strings.ID;
-
-        public override void DefsLoaded() 
-            => MySettings.Setup(Settings);
-
-        public override void SettingsChanged() 
-            => MySettings.Instance.Write();
+        public static void OnInit() 
+            => MySettings.Instance = Instance.GetSettings<MySettings>();
     }
 
-    public class ModMain : Mod {
-        public ModMain(ModContentPack content) : base(content) {
-            MySettings.Instance = GetSettings<MySettings>();
-            Main.Instance?.DefsLoaded();
-        }
+    [HarmonyPatch]
+    public static class InitHook {
+        [HarmonyPatch(typeof(MainMenuDrawer), nameof(MainMenuDrawer.Init))]
+        [HarmonyPostfix]
+        public static void Init() 
+            => ModMain.OnInit();
     }
 }

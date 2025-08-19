@@ -19,7 +19,11 @@ namespace CraftWithColor {
                 .RandomElementWithFallback(null),
 
             b => Find.CurrentMap.mapPawns.FreeColonists
-                .Select(p => p.story.favoriteColor)
+                .Select(p => p.story.favoriteColor
+#if VERSION_GE_1_6
+                        ?.color
+#endif
+                        )
                 .Where(c => c != null)
                 .RandomElementWithFallback(null),
 

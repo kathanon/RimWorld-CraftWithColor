@@ -5,14 +5,27 @@
     <ModName>CraftWithColor</ModName>
     <ModId>kathanon.CraftWithColor</ModId>
     <MultiVersion>true</MultiVersion>
+    <Steam Condition="'$(Steam)' == ''">C:\Program Files\Steam</Steam>
+    <RimWorld>$(Steam)\steamapps\common\RimWorld</RimWorld>
+    <RimWorldVersion>$([System.IO.File]::ReadAllText("$(RimWorld)\Version.txt").Substring(0,3))</RimWorldVersion>
   </PropertyGroup>
-  <PropertyGroup>
+  <PropertyGroup Condition="$(RimWorldVersion) &lt; 1.55">
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{18BD585B-B1D1-40CD-918A-13A5F2027F35}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition="$(RimWorldVersion) &gt; 1.55">
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{18BD585B-B1D1-40CD-918A-13A5F2027F35}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>

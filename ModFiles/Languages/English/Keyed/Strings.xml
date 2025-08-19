@@ -44,7 +44,7 @@
 	<kathanon.CraftWithColor.ChangeMode.desc>If the crafting bill is changed to use a new color while crafting the item is in progress, what should happen? (Only when an "unfinished" item is generated while crafting.)</kathanon.CraftWithColor.ChangeMode.desc>
 	<kathanon.CraftWithColor.ChangeMode.Keep>Keep the color</kathanon.CraftWithColor.ChangeMode.Keep>
 	<kathanon.CraftWithColor.ChangeMode.Switch>Switch the color</kathanon.CraftWithColor.ChangeMode.Switch>
-	<kathanon.CraftWithColor.ChangeMode.RequireDye>Consume 1 dye to switch the color</kathanon.CraftWithColor.ChangeMode.RequireDye>
+	<kathanon.CraftWithColor.ChangeMode.RequireDye>Consume 1 dye to switch</kathanon.CraftWithColor.ChangeMode.RequireDye>
   
 	<kathanon.CraftWithColor.NoSpaceError>Could not find valid place for dialog addition, conflicting mods:
 </kathanon.CraftWithColor.NoSpaceError>

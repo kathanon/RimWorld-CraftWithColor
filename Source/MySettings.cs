@@ -1,6 +1,9 @@
-﻿using HugsLib.Settings;
+﻿using FloatSubMenus;
+using MoreWidgets;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 
 namespace CraftWithColor {
@@ -14,148 +17,204 @@ namespace CraftWithColor {
         public const bool DyeRequiresIdeology = false;
         public static bool HasStyleButton => WithIdeology && Find.IdeoManager.classicMode;
 #endif
-        public enum ColorChangeMode { Keep, Switch, RequireDye }
-        public enum ColorChangeModeNoIdeo { Keep, Switch }
-
-        private static SettingHandle<bool> onlyStandard;
-        private static SettingHandle<bool> requireDye;
-        private static SettingHandle<bool> styling;
-        private static SettingHandle<bool> setStyle;
-        private static SettingHandle<ColorChangeMode> changeMode;
-        private static SettingHandle<ColorChangeModeNoIdeo> changeModeNoIdeo;
-
-        private static bool getOnlyStandard => onlyStandard ?? false;
-        private static bool getRequireDye => requireDye ?? true;
-        private static bool getStyling => styling ?? true;
-        private static bool getSetStyle => setStyle ?? true;
-        private static ColorChangeMode getChangeMode =>
-            changeMode ?? ColorChangeMode.Keep;
-        private static ColorChangeModeNoIdeo getChangeModeNoIdeo =>
-            changeModeNoIdeo ?? ColorChangeModeNoIdeo.Keep;
-
-        public static bool OnlyStandard => WithIdeology && getOnlyStandard;
-
-        public static bool RequireDye => (WithIdeology || !DyeRequiresIdeology) && getRequireDye;
-
-        public static bool Styling => WithIdeology && getStyling && !getOnlyStandard;
-
-        public static bool IdeoSymbols => true; // TODO
-
-        public static bool SetStyle => getSetStyle && !HasStyleButton;
-
-        public static bool SwitchColor {
-            get => WithIdeology
-                ? getChangeMode != ColorChangeMode.Keep
-                : getChangeModeNoIdeo != ColorChangeModeNoIdeo.Keep;
+        public enum ColorChangeMode { 
+            Keep, 
+            Switch, 
+            //RequireDye,
         }
 
-        public static bool SwitchUseDye {
-            get => WithIdeology && getRequireDye && getChangeMode == ColorChangeMode.RequireDye;
-        }
+        private readonly BoolOption onlyStandard = new BoolOption(
+            "onlyStandard",
+            Strings.OnlyStandard_title,
+            Strings.OnlyStandard_desc,
+            false,
+            HasIdeology);
+        private readonly BoolOption styling = new BoolOption(
+            "styling",
+            Strings.Styling_title,
+            Strings.Styling_desc,
+            true, 
+            ShowStyling);
+        private readonly BoolOption requireDye = new BoolOption(
+            "requireDye",
+            Strings.RequireDye_title,
+            Strings.RequireDye_desc, 
+            true, 
+            () => WithIdeology || !DyeRequiresIdeology, 
+            State.UpdateAll);
+        private readonly BoolOption setStyle = new BoolOption(
+            "setStyle",
+            Strings.SetStyle_title,
+            Strings.SetStyle_desc, 
+            true,
+            HasIdeology);
+        private readonly EnumOption<ColorChangeMode> changeMode = new EnumOption<ColorChangeMode>(
+            "changeMode",
+            Strings.ChangeMode_title,
+            Strings.ChangeMode_desc,
+            Strings.ChangeMode_prefix, 
+            ColorChangeMode.Keep);
+        private readonly IOption[] options;
+        private float? width;
+
+        public static bool OnlyStandard => Instance?.IntOnlyStandard ?? false;
+        public static bool RequireDye   => Instance?.IntRequireDye   ?? false;
+        public static bool Styling      => Instance?.IntStyling      ?? false;
+        public static bool IdeoSymbols  => Instance?.IntIdeoSymbols  ?? false;
+        public static bool SetStyle     => Instance?.IntSetStyle     ?? false;
+        public static bool SwitchColor  => Instance?.IntSwitchColor  ?? false;
+        public static bool SwitchUseDye => Instance?.IntSwitchUseDye ?? false;
+
+        private bool IntOnlyStandard => WithIdeology && onlyStandard.Value;
+        private bool IntRequireDye   => (WithIdeology || !DyeRequiresIdeology) && requireDye.Value;
+        private bool IntStyling      => WithIdeology && styling.Value && !onlyStandard.Value;
+        private bool IntIdeoSymbols  => true; // TODO
+        private bool IntSetStyle     => setStyle.Value && !HasStyleButton;
+        private bool IntSwitchColor  => changeMode.Value != ColorChangeMode.Keep;
+        private bool IntSwitchUseDye => false;  // Not implemented yet
 
         public static readonly bool WithIdeology =
             ModLister.GetActiveModWithIdentifier("Ludeon.RimWorld.Ideology") != null;
 
+        private static bool HasIdeology() 
+            => WithIdeology;
+
+        private static bool ShowStyling() 
+            => !Instance.onlyStandard.Value;
+
         public static MultiRange ConflictingCheckboxRange { get; private set; } = new MultiRange();
         public static List<string> ConflictingMods { get; private set; } = new List<string>();
 
-        private static bool setupDone = false;
+        public MySettings() {
+            options = new IOption[] { onlyStandard, requireDye, styling, setStyle, changeMode };
 
-        public static void Setup(ModSettingsPack pack) {
-            if (setupDone || Instance == null) return;
-            setupDone = true;
-
-            if (WithIdeology) {
-                onlyStandard = pack.GetHandle(
-                    "onlyStandard",
-                    Strings.OnlyStandard_title,
-                    Strings.OnlyStandard_desc,
-                    false);
-                styling = pack.GetHandle(
-                    "styling",
-                    Strings.Styling_title,
-                    Strings.Styling_desc,
-                    true);
-            }
-            if (WithIdeology || !DyeRequiresIdeology) {
-                requireDye = pack.GetHandle(
-                    "requireDye",
-                    Strings.RequireDye_title,
-                    Strings.RequireDye_desc,
-                    true);
-            }
-
-            setStyle = pack.GetHandle(
-                "setStyle",
-                Strings.SetStyle_title,
-                Strings.SetStyle_desc,
-                true);
-
-            if (WithIdeology) {
-                changeMode = pack.GetHandle(
-                    "changeMode",
-                    Strings.ChangeMode_title,
-                    Strings.ChangeMode_desc,
-                    ColorChangeMode.Keep,
-                    enumPrefix: Strings.ChangeMode_prefix);
-
-                styling.VisibilityPredicate = () => !onlyStandard;
-                requireDye.ValueChanged += _ => State.UpdateAll();
-                // Disabled until ColorChangeMode.RequireDye is implemented
-                changeMode.VisibilityPredicate = () => requireDye && false;
-            }
-
-            changeModeNoIdeo = pack.GetHandle(
-                "changeModeNoIdeo",
-                Strings.ChangeMode_title,
-                Strings.ChangeMode_desc,
-                ColorChangeModeNoIdeo.Keep,
-                enumPrefix: Strings.ChangeMode_prefix);
-
-            // Locked-in until ColorChangeMode.RequireDye is implemented
-            changeModeNoIdeo.VisibilityPredicate = () => !RequireDye || true;
-            if (WithIdeology) {
-                changeMode.ValueChanged += (_) => {
-                    if (changeMode != ColorChangeMode.RequireDye) {
-                        changeModeNoIdeo.Value =
-                            (changeMode == ColorChangeMode.Keep)
-                            ? ColorChangeModeNoIdeo.Keep
-                            : ColorChangeModeNoIdeo.Switch;
-                    }
-                };
-                changeModeNoIdeo.ValueChanged += (_) => {
-                    if (changeMode != ColorChangeMode.RequireDye) {
-                        changeMode.Value =
-                            (changeModeNoIdeo == ColorChangeModeNoIdeo.Keep)
-                            ? ColorChangeMode.Keep
-                            : ColorChangeMode.Switch;
-                    }
-                };
-            }
-
-            var dict = Strings.OverlapingMods;
+            var dict = StaticStrings.OverlappingMods;
             foreach (var mod in ModLister.AllInstalledMods.Where(m => dict.ContainsKey(m.PackageIdNonUnique) && m.Active)) {
                 ConflictingCheckboxRange.Merge(dict[mod.PackageIdNonUnique]);
                 ConflictingMods.Add(mod.Name);
             }
-
-            Instance.Write();
         }
 
+        public void DoGUI(Rect r) {
+            if (width == null) width = options.Max(x => x.Width);
+            var row = new Rect(r.x, r.y, width.Value, Widgets.CheckboxSize);
+            foreach (var option in options) {
+                option.DoGUI(ref row);
+            }
+        }
+
+
         public override void ExposeData() {
-            if (Scribe.mode != LoadSaveMode.Saving) return;
+            foreach (var option in options) {
+                option.ExposeData();
+            }
+        }
 
-            bool onlyStandard = MySettings.onlyStandard ?? false;
-            bool requireDye   = MySettings.requireDye ?? false;
-            bool styling      = MySettings.styling ?? false;
-            bool setStyle     = MySettings.setStyle;
-            var changeMode    = (ColorChangeMode) changeModeNoIdeo.Value;
+        private interface IOption : IExposable {
+            void DoGUI(ref Rect row);
+            float Width { get; }
+        }
 
-            Scribe_Values.Look(ref onlyStandard, "onlyStandard", false);
-            Scribe_Values.Look(ref requireDye,   "requireDye",   true);
-            Scribe_Values.Look(ref styling,      "styling",      true);
-            Scribe_Values.Look(ref setStyle,     "setStyle",     true);
-            Scribe_Values.Look(ref changeMode,   "changeMode",   ColorChangeMode.Keep);
+        private abstract class Option<T> : IOption {
+            protected readonly string name;
+            protected readonly string label;
+            protected readonly string tip;
+            protected readonly T defaultValue;
+            protected readonly Func<bool> visible;
+            protected readonly Action onChange;
+            protected T value;
+
+            protected Option(string name,
+                             string label,
+                             string tip,
+                             T defaultValue,
+                             Func<bool> visible,
+                             Action onChange) {
+                this.name = name;
+                this.label = label;
+                this.tip = tip;
+                this.defaultValue = defaultValue;
+                this.visible = visible;
+                this.onChange = onChange;
+                value = defaultValue;
+            }
+
+            public T Value
+                => value;
+
+            public float Width 
+                => Text.CalcSize(label).x + 8f + ControlWidth;
+
+            protected abstract float ControlWidth { get; }
+
+            protected abstract void DoControl(Rect row);
+
+            public void DoGUI(ref Rect row) {
+                if (visible != null && !visible()) return;
+                Text.Anchor = TextAnchor.MiddleLeft;
+                Widgets.Label(row, label);
+                GenUI.ResetLabelAlign();
+                DoControl(row);
+                TooltipHandler.TipRegion(row, tip);
+                row.StepY(4f);
+            }
+
+            public void ExposeData() 
+                => Scribe_Values.Look(ref value, name, defaultValue);
+        }
+
+        private class BoolOption : Option<bool> {
+            public BoolOption(string name,
+                              string label,
+                              string tip,
+                              bool defaultValue,
+                              Func<bool> visible = null,
+                              Action onChange = null) 
+                : base(name, label, tip, defaultValue, visible, onChange) {}
+
+            protected override float ControlWidth => Widgets.CheckboxSize;
+
+            protected override void DoControl(Rect row) {
+                bool old = value;
+                Widgets.Checkbox(new Vector2(row.xMax - Widgets.CheckboxSize, row.y), ref value);
+                if (old != value && onChange != null) onChange(); 
+            }
+        }
+
+        private class EnumOption<T> : Option<T> where T : Enum {
+            private readonly T[] values;
+            private readonly Dictionary<T, string> labels;
+            private float controlWidth = 0f;
+
+            public EnumOption(string name,
+                              string label,
+                              string tip,
+                              string prefix,
+                              T defaultValue,
+                              Func<bool> visible = null,
+                              Action onChange = null)
+                : base(name, label, tip, defaultValue, visible, onChange) {
+                values = (T[]) Enum.GetValues(typeof(T));
+                labels = values
+                    .ToDictionary(x => x, 
+                                  x => Strings.EnumLabel(x, prefix));
+            }
+
+            protected override float ControlWidth {
+                get {
+                    if (controlWidth == 0f) {
+                        controlWidth = 16f + labels.Values
+                            .Max(l => Text.CalcSize(l).x);
+                    }
+                    return controlWidth;
+                }
+            }
+
+            protected override void DoControl(Rect row) {
+                if (Widgets.ButtonText(row.RightPartPixels(controlWidth), labels[value])) {
+                    values.Select(x => new FloatMenuOption(labels[x], () => value = x)).OpenMenu();
+                }
+            }
         }
     }
 }

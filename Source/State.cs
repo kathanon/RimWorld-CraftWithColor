@@ -71,7 +71,7 @@ namespace CraftWithColor {
         }
 
         public static BillAddition TryGetAddition(Bill bill) =>
-            bill != null ? dict.TryGetValue(bill) : null;
+            (bill != null && dict.TryGetValue(bill, out var value)) ? value : null;
 
         public static BillAddition GetAddition(Bill_Production bill) {
             if (!dict.ContainsKey(bill)) {
@@ -116,13 +116,13 @@ namespace CraftWithColor {
         public static ColorDef CustomColorDef(Color color, ColorType type) {
             var c32 = (Color32) color;
             int cint = (c32.r << 16) | (c32.g << 8) | c32.b;
-            return CustomColorDef(Strings.DEF + cint, color, type);
+            return CustomColorDef(StaticStrings.DEF + cint, color, type);
         }
 
         public static ColorDef CustomColorDef(string name, ColorType type) {
-            if (name?.StartsWith(Strings.DEF) ?? false) {
+            if (name?.StartsWith(StaticStrings.DEF) ?? false) {
                 try {
-                    int c = int.Parse(name.Substring(Strings.DEF.Length));
+                    int c = int.Parse(name.Substring(StaticStrings.DEF.Length));
                     var color = new ColorInt(c >> 16, (c >> 8) & 0xFF, c & 0xFF).ToColor;
                     return CustomColorDef(name, color, type);
                 } catch {}
@@ -241,7 +241,7 @@ namespace CraftWithColor {
         private static int saveFormat = 0;
 
         public static void ExposeData(SaveState save) {
-            if (Scribe.mode != LoadSaveMode.Saving && Scribe.EnterNode(Strings.ID) && saveFormat < 2) {
+            if (Scribe.mode != LoadSaveMode.Saving && Scribe.EnterNode(StaticStrings.ID) && saveFormat < 2) {
                 Scribe_Collections.Look(ref dict, "additions", LookMode.Reference, LookMode.Deep, ref save.addsKeyWorkList, ref save.addsValueWorkList);
                 Scribe_Collections.Look(ref savedColors, "savedColors", LookMode.Value, null);
                 Scribe.ExitNode();
@@ -277,7 +277,7 @@ namespace CraftWithColor {
                 return;
             }
 
-            if (Scribe.EnterNode(Strings.ID)) {
+            if (Scribe.EnterNode(StaticStrings.ID)) {
                 if (Scribe.mode == LoadSaveMode.LoadingVars) {
                     add = dict[bill] = new BillAddition(bill);
                 }

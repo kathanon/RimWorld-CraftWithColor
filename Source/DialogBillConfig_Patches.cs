@@ -85,7 +85,7 @@ namespace CraftWithColor {
                     var a = m.PlayerPawnsForStoryteller;
                 } catch (RangeLimitException) {
                     if (!openAnimation) {
-                        Main.Instance.Logger.Error(Strings.NoSpaceError + MySettings.ConflictingMods);
+                        Log.Error(Strings.NoSpaceError + MySettings.ConflictingMods);
                     }
                     disabled = true;
                 }

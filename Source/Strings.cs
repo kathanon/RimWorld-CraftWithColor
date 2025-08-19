@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using Verse;
 
-namespace CraftWithColor
-{
-    internal static class Strings
-    {
+namespace CraftWithColor {
+    internal static class StaticStrings {
         // Non-translated constants
         public const string ID = "kathanon.CraftWithColor";
+        public const string Name = "Craft With Color";
         public const string PREFIX = ID + ".";
         public static readonly string DEF = PREFIX.Replace('.', '_');
 
@@ -16,12 +15,15 @@ namespace CraftWithColor
         public const string MATH_ID     = "crunchyduck.math";
         public static bool IsBwmId(string id) => id == BWM_ID || id == BWM_TEMP_ID;
 
-        public static readonly Dictionary<string, Range> OverlapingMods = new Dictionary<string, Range>
+        public static readonly Dictionary<string, Range> OverlappingMods = new Dictionary<string, Range>
         {
             // Range is distance from bottom margin of dialog
             { BWM_ID,      new Range(60f, 60f) },
             { BWM_TEMP_ID, new Range(60f, 60f) },
         };
+    }
+    internal static class Strings {
+        public const string PREFIX = StaticStrings.PREFIX;
 
         // Menus and dialogs
         public static readonly string Select       = (PREFIX + "Select"      ).Translate();
@@ -63,5 +65,9 @@ namespace CraftWithColor
         public static readonly string ChangeMode_title   = (PREFIX + "ChangeMode.title"  ).Translate();
         public static readonly string ChangeMode_desc    = (PREFIX + "ChangeMode.desc"   ).Translate();
         public static readonly string ChangeMode_prefix  =  PREFIX + "ChangeMode.";
+
+        public static string EnumLabel<T>(T value, string prefix) 
+            => (prefix + value).Translate();
+
     }
 }

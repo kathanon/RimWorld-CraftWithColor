@@ -41,7 +41,14 @@ namespace CraftWithColor
         private static List<FloatMenuOption> SavedSubMenu(ITargetColor target) =>
             SubMenuItems(target, State.SavedColors, RandomType.Saved, c => c, c => " ");
         private static List<FloatMenuOption> FavoriteSubMenu(ITargetColor target) =>
-            SubMenuItems(target, Find.CurrentMap.mapPawns.FreeColonists, RandomType.Favorite, p => p.story.favoriteColor);
+            SubMenuItems(target,
+                         Find.CurrentMap.mapPawns.FreeColonists,
+                         RandomType.Favorite,
+                         p => p.story.favoriteColor
+#if VERSION_GE_1_6
+                         ?.color
+#endif
+                         );
         private static List<FloatMenuOption> IdeoSubMenu(ITargetColor target) =>
             SubMenuItems(target, Find.IdeoManager.IdeosInViewOrder, RandomType.Ideo, i => i.ApparelColor);
 

@@ -5,16 +5,42 @@
     <Steam Condition="'$(Steam)' == ''">C:\Program Files\Steam</Steam>
     <RimWorld>$(Steam)\steamapps\common\RimWorld</RimWorld>
     <RimWorldDlls>$(RimWorld)\RimWorldWin64_Data\Managed</RimWorldDlls>
-    <RimWorldVersion Condition="'$(RimWorldVersion)' == ''">$([System.IO.File]::ReadAllText("$(RimWorld)\Version.txt").Substring(0,3))</RimWorldVersion>
-    <VersionConst>VERSION_$(RimWorldVersion.Replace(".","_"))</VersionConst>
-    <DefineConstants>$(VersionConst)</DefineConstants>
+    <RimWorldVersion>$([System.IO.File]::ReadAllText("$(RimWorld)\Version.txt").Substring(0,3))</RimWorldVersion>
     <ModsDir>$(RimWorld)\Mods</ModsDir>
     <OutputPath>$(ModsDir)\$(ModName)</OutputPath>
+    <ModFiles>..\ModFiles</ModFiles>
+    <ModsList>$(LocalAppData)Low\Ludeon Studios\RimWorld by Ludeon Studios\Config\ModsConfig.xml</ModsList>
+    
+    <!-- Rimworld version -->
+    <VersionConst>VERSION_$(RimWorldVersion.Replace(".","_"))</VersionConst>
+    <Version14 Condition="'$(RimWorldVersion)' == '1.4'">VERSION_GE_1_4;VERSION_LE_1_4</Version14>
+    <Version14 Condition="'$(RimWorldVersion)' != '1.4' And $(RimWorldVersion) &lt; 1.4">VERSION_LE_1_4</Version14>
+    <Version14 Condition="'$(RimWorldVersion)' != '1.4' And $(RimWorldVersion) &gt; 1.4">VERSION_GE_1_4</Version14>
+    <Version15 Condition="'$(RimWorldVersion)' == '1.5'">VERSION_GE_1_5;VERSION_LE_1_5</Version15>
+    <Version15 Condition="'$(RimWorldVersion)' != '1.5' And $(RimWorldVersion) &lt; 1.5">VERSION_LE_1_5</Version15>
+    <Version15 Condition="'$(RimWorldVersion)' != '1.5' And $(RimWorldVersion) &gt; 1.5">VERSION_GE_1_5</Version15>
+    <Version16 Condition="'$(RimWorldVersion)' == '1.6'">VERSION_GE_1_6;VERSION_LE_1_6</Version16>
+    <Version16 Condition="'$(RimWorldVersion)' != '1.6' And $(RimWorldVersion) &lt; 1.6">VERSION_LE_1_6</Version16>
+    <Version16 Condition="'$(RimWorldVersion)' != '1.6' And $(RimWorldVersion) &gt; 1.6">VERSION_GE_1_6</Version16>
+    <Version17 Condition="'$(RimWorldVersion)' == '1.7'">VERSION_GE_1_7;VERSION_LE_1_7</Version17>
+    <Version17 Condition="'$(RimWorldVersion)' != '1.7' And $(RimWorldVersion) &lt; 1.7">VERSION_LE_1_7</Version17>
+    <Version17 Condition="'$(RimWorldVersion)' != '1.7' And $(RimWorldVersion) &gt; 1.7">VERSION_GE_1_7</Version17>
+    <Version18 Condition="'$(RimWorldVersion)' == '1.8'">VERSION_GE_1_8;VERSION_LE_1_8</Version18>
+    <Version18 Condition="'$(RimWorldVersion)' != '1.8' And $(RimWorldVersion) &lt; 1.8">VERSION_LE_1_8</Version18>
+    <Version18 Condition="'$(RimWorldVersion)' != '1.8' And $(RimWorldVersion) &gt; 1.8">VERSION_GE_1_8</Version18>
+    <Version19 Condition="'$(RimWorldVersion)' == '1.9'">VERSION_GE_1_9;VERSION_LE_1_9</Version19>
+    <Version19 Condition="'$(RimWorldVersion)' != '1.9' And $(RimWorldVersion) &lt; 1.9">VERSION_LE_1_9</Version19>
+    <Version19 Condition="'$(RimWorldVersion)' != '1.9' And $(RimWorldVersion) &gt; 1.9">VERSION_GE_1_9</Version19>
+    <DefineConstants>$(VersionConst);$(Version14);$(Version15);$(Version16);$(Version17);$(Version18);$(Version19)</DefineConstants>
+    
+    <!-- Things depending on version -->
     <AssembliesSubDir Condition="'$(MultiVersion)' == 'true'">$(RimWorldVersion)\Assemblies</AssembliesSubDir>
     <AssembliesSubDir Condition="'$(MultiVersion)' != 'true'">Assemblies</AssembliesSubDir>
     <AssembliesDir>$(OutputPath)\$(AssembliesSubDir)</AssembliesDir>
-    <ModFiles>..\ModFiles</ModFiles>
-    <ModsList>$(LocalAppData)Low\Ludeon Studios\RimWorld by Ludeon Studios\Config\ModsConfig.xml</ModsList>
+    <UseFramework Condition="$(RimWorldVersion) &lt; 1.55">4.7.2</UseFramework>
+    <UseFramework Condition="$(RimWorldVersion) &gt; 1.55">4.8</UseFramework>
+    
+    <!-- Other mods -->
     <Workshop>$(Steam)\steamapps\workshop\content\294100</Workshop>
     <HarmonyPath>$(Workshop)\2009463077\Current\Assemblies\0Harmony.dll</HarmonyPath>
     <HugsLibPath>$(Workshop)\818773962\v$(RimWorldVersion)\Assemblies\HugsLib.dll</HugsLibPath>

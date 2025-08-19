@@ -38,6 +38,6 @@ namespace CraftWithColor {
 
     public static class BetterWorkbenchManagement {
         public static readonly bool Active =
-            ModLister.AllInstalledMods.Any(m => Strings.IsBwmId(m.PackageIdNonUnique) && m.Active);
+            ModLister.AllInstalledMods.Any(m => StaticStrings.IsBwmId(m.PackageIdNonUnique) && m.Active);
     }
 }

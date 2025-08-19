@@ -13,8 +13,11 @@ namespace CraftWithColor
 
         [HarmonyPatch(nameof(Widgets.ThingIcon), 
             typeof(Rect), typeof(ThingDef), typeof(ThingDef), typeof(ThingStyleDef), typeof(float), typeof(Color?)
-#if !VERSION_1_3
+#if VERSION_GE_1_4
             , typeof(int?)
+#endif
+#if VERSION_GE_1_6
+            , typeof(float)
 #endif
             )]
         [HarmonyPrefix]
@@ -29,7 +32,7 @@ namespace CraftWithColor
 
         [HarmonyPatch(nameof(Widgets.GetIconFor),
             typeof(ThingDef), typeof(ThingDef), typeof(ThingStyleDef)
-#if !VERSION_1_3
+#if VERSION_GE_1_4
             , typeof(int?)
 #endif
             )]
